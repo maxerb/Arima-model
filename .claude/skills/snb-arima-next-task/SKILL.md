@@ -44,8 +44,7 @@ The project must not depend on anything outside `Arima-model/`. Ask the user bef
   UTF-16); `read_snb_cube` from `src/snb.py` → `src/arima_snb/io.py` with paths changed to `data/raw`.
 - Create a local virtual environment `.venv/`, `pip install -r requirements.txt pytest`, `pip install -e .`, then
   re-pin with `pip freeze --exclude-editable > requirements.txt` (F-001).
-- Check each raw file's licence before tracking it in git; gitignore files with unclear terms and say so in
-  `docs/data_sources.md` (D-08, F-002).
+- `data/raw/` is not tracked in git (D-08); every raw file needs download steps in `docs/data_sources.md`.
 - `io.py` needs the path constants, so T0.0 creates the paths section of `config.py`; T0.1 adds the rest (F-003).
 - Check: `grep -rn "\.\./" src scripts tests` finds nothing; the SNB loader reads a file from `data/raw/`.
 

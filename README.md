@@ -13,6 +13,17 @@ python -m venv .venv
 .venv\Scripts\python -m pytest -q
 ```
 
+## Data
+
+Raw data is not stored in this repository (decision D-08). Download it into `data/raw/` first:
+
+| Dataset | Source | Used for |
+|---|---|---|
+| KOF Consensus Forecast (mean, median) | [KOF data service](https://datenservice.kof.ethz.ch) | Consensus benchmark, Table 1 (D-06) |
+
+More sources (CPI items and weights, oil, exchange rate, mortgage rates) are added as the project goes on.
+Exact steps for every file are in [`docs/data_sources.md`](docs/data_sources.md).
+
 ## Rebuild everything
 
 ```powershell

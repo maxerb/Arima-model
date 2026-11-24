@@ -6,7 +6,8 @@ description: Find, download and document the raw data for the SNB disaggregate-A
 # SNB ARIMA — data acquisition (T1.1–T1.3)
 
 ## Outputs
-- Raw files in `data/raw/` (read-only afterwards; original name, add download date if missing).
+- Raw files in `data/raw/` (read-only afterwards; original name, add download date if missing). `data/raw/` is not in
+  git (D-08), so every file must be re-downloadable: a `scripts/00_download_*.py` script, or exact manual steps.
 - One row per series in `codebook.csv` (columns: `variable, description, source, series_id, url, unit, orig_freq,
   to_quarterly, transform, sample_start, sample_end, download_date, script, notes`).
 - `docs/data_sources.md`: per dataset — provider, exact page/URL, how to download (clicks or API call), vintage, licence note.

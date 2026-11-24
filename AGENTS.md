@@ -77,7 +77,7 @@ Arima-model/                  # repository root
 │   └── report.py         # LaTeX tables, figures, paper-vs-ours comparison
 ├── scripts/                  # 00_download_*.py, 01_build_panel.py, … run_all.py
 │   └── explore/              # exploratory scripts (kept, not part of run_all.py)
-├── data/raw/                 # raw downloads, read-only (tracked in git if licence and size allow, D-08)
+├── data/raw/                 # raw downloads, read-only, NOT in git (D-08); sources in docs/data_sources.md + README
 ├── data/meta/                # hand-transcribed paper tables (Table 9 items, Tables 5–8 calendars) — tracked in git
 ├── data/interim/  data/final/  # derived data (regenerable, gitignored)
 ├── outputs/forecasts/  outputs/eval/  outputs/tables/  outputs/figures/

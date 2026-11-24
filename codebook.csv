@@ -1,5 +1,3 @@
 variable,description,source,series_id,url,unit,orig_freq,to_quarterly,transform,sample_start,sample_end,download_date,script,notes
-zimoma_*,SNB money market rates (13 series incl. SARON),SNB data portal,zimoma,https://data.snb.ch,percent,M,,none,1972-01,2026-10,2026-11-02,src/arima_snb/io.py,imported from thesis repo (T0.0); one row per cube until series are used
-snboffzisa_*,SNB official interest rates (10 series),SNB data portal,snboffzisa,https://data.snb.ch,percent,M,,none,2000-01,2026-09,2026-10-21,src/arima_snb/io.py,imported from thesis repo (T0.0); one row per cube until series are used
-kof_consensus_mean,KOF Consensus Forecast - mean,KOF data service,kof_consensus_forecast_mean,https://datenservice.kof.ethz.ch,percent,,,none,,,2026-11-16,,substitute for Consensus Economics (D-06); not in git until licence checked
-kof_consensus_median,KOF Consensus Forecast - median,KOF data service,kof_consensus_forecast_median,https://datenservice.kof.ethz.ch,percent,,,none,,,2026-11-16,,not in git until licence checked
+kof_consensus_mean,KOF Consensus Forecast - mean,KOF data service,kof_consensus_forecast_mean,https://datenservice.kof.ethz.ch,percent,,,none,,,2026-11-16,,substitute for Consensus Economics (D-06)
+kof_consensus_median,KOF Consensus Forecast - median,KOF data service,kof_consensus_forecast_median,https://datenservice.kof.ethz.ch,percent,,,none,,,2026-11-16,,

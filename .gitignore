@@ -11,7 +11,8 @@ data/interim/
 data/final/
 outputs/
 
-# data/raw/ is tracked when licence and size allow (D-08); list exceptions here
+# Raw downloads are not tracked (D-08); docs/data_sources.md and README say how to get them
+data/raw/
 
 # LaTeX build files
 *.aux
@@ -29,6 +30,3 @@ outputs/
 Thumbs.db
 desktop.ini
 .DS_Store
-
-# Raw files whose licence is not yet checked (docs/data_sources.md)
-data/raw/kof_*

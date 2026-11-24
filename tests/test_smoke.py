@@ -37,13 +37,22 @@ def test_no_parent_paths_in_code():
             assert not pattern.search(py.read_text(encoding="utf-8")), f"parent-folder path in {py}"
 
 
-@pytest.mark.parametrize("cube", ["zimoma", "snboffzisa"])
-def test_snb_loader_long_format(cube):
-    df = read_snb_cube(find_raw(f"snb-data-{cube}-*.csv"), cube)
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_snb_loader_long_format():
+    """The SNB loader on a tiny file in the data portal's layout (raw data is not in git, D-08)."""
+    df = read_snb_cube(FIXTURES / "snb-data-testcube-en-all-20261124_0000.csv", "testcube")
     assert list(df.columns) == LONG_COLUMNS
-    assert len(df) > 0
+    assert len(df) == 3                              # the empty value for A in 2000-01 is dropped
+    assert set(df["variable"]) == {"testcube_A", "testcube_B"}
     assert not df.duplicated(["date", "variable"]).any()
     assert (df["date"].dt.day == 1).all()          # monthly dates are first of month
+
+
+def test_find_raw_explains_missing_file():
+    with pytest.raises(FileNotFoundError, match="data_sources.md"):
+        find_raw("no-such-file-*.csv")
 
 
 def test_sic_matches_paper_formula():
