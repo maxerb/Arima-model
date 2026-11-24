@@ -115,7 +115,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | **P1** | **Data** | | | |
 | T1.1 | Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year | `snb-arima-data` | T0.1 | done (2026-11-24; 7 bases + GEWICHTUNGEN, loaders in io.py, D-18) |
 | T1.2 | Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts | `snb-arima-data` | T0.1 | done (2026-11-24; FRED + 6 SNB cubes, D-19/D-20; consensus = KOF from T0.0) |
-| T1.3 | Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars) | `snb-arima-data` | – | todo |
+| T1.3 | Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars) | `snb-arima-data` | – | done (2026-11-24; 182 items sum 92.788, calendars cross-checked vs PDF; agg6 per D-21 in T1.4) |
 | T1.4 | Build consistent item panel (chain-link bases, map items across revisions → ~182 items) | `snb-arima-cpi-panel` | T1.1, T1.3 | todo |
 | T1.5 | Weights by year + collection calendar (official + inferred) | `snb-arima-cpi-panel` | T1.4 | todo |
 | T1.6 | Validate: re-aggregated CPI vs official (paper Chart 4) | `snb-arima-aggregate` | T1.5 | todo |

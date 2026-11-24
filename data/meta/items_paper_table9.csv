@@ -1,0 +1,183 @@
+item_no,item_en,weight_2010,agg6,agg14
+1,Rice,0.046,,Food and non-alcoholic beverages
+2,Flour,0.062,,Food and non-alcoholic beverages
+3,Bread,0.522,,Food and non-alcoholic beverages
+4,Small baked goods,0.169,,Food and non-alcoholic beverages
+5,Viennese pastries and other pastry products,0.305,,Food and non-alcoholic beverages
+6,Biscuit products,0.261,,Food and non-alcoholic beverages
+7,Pasta,0.172,,Food and non-alcoholic beverages
+8,Other cereal products,0.186,,Food and non-alcoholic beverages
+9,Table 8 continued Beef,0.364,,Food and non-alcoholic beverages
+10,Veal,0.119,,Food and non-alcoholic beverages
+11,Pork,0.317,,Food and non-alcoholic beverages
+12,Lamb,0.072,,Food and non-alcoholic beverages
+13,Poultry,0.364,,Food and non-alcoholic beverages
+14,Other meat,0.214,,Food and non-alcoholic beverages
+15,Sausages,0.549,,Food and non-alcoholic beverages
+16,Processed and cooked meat,0.471,,Food and non-alcoholic beverages
+17,Fresh fish,0.188,,Food and non-alcoholic beverages
+18,Frozen fish,0.073,,Food and non-alcoholic beverages
+19,Tinned and smoked fish,0.075,,Food and non-alcoholic beverages
+20,Whole milk,0.158,,Food and non-alcoholic beverages
+21,Other type of milk,0.139,,Food and non-alcoholic beverages
+22,Hard and semi-hard cheese,0.542,,Food and non-alcoholic beverages
+23,"Fresh, soft and melted cheese",0.304,,Food and non-alcoholic beverages
+24,Other dairy products,0.357,,Food and non-alcoholic beverages
+25,Cream,0.114,,Food and non-alcoholic beverages
+26,Eggs,0.154,,Food and non-alcoholic beverages
+27,Butter,0.138,,Food and non-alcoholic beverages
+28,"Margarine, fats and edible oils",0.145,,Food and non-alcoholic beverages
+29,Citrus fruit,0.116,,Food and non-alcoholic beverages
+30,Stone fruit,0.105,,Food and non-alcoholic beverages
+31,Pome fruit,0.156,,Food and non-alcoholic beverages
+32,Bananas,0.083,,Food and non-alcoholic beverages
+33,Other fruits,0.24,,Food and non-alcoholic beverages
+34,"Dried, frozen and tinned fruits",0.182,,Food and non-alcoholic beverages
+35,Fruiting vegetables,0.225,,Food and non-alcoholic beverages
+36,Root vegetables,0.138,,Food and non-alcoholic beverages
+37,Salad vegetables,0.228,,Food and non-alcoholic beverages
+38,Brassicas,0.055,,Food and non-alcoholic beverages
+39,Onions,0.055,,Food and non-alcoholic beverages
+40,Other vegetables,0.057,,Food and non-alcoholic beverages
+41,Potatoes,0.082,,Food and non-alcoholic beverages
+42,"Dried, frozen and tinned vegetables",0.134,,Food and non-alcoholic beverages
+43,Potato products,0.121,,Food and non-alcoholic beverages
+44,Jam and honey,0.108,,Food and non-alcoholic beverages
+45,Chocolate,0.363,,Food and non-alcoholic beverages
+46,Sweets and chewing gum,0.11,,Food and non-alcoholic beverages
+47,Ice-cream,0.104,,Food and non-alcoholic beverages
+48,Sugar,0.036,,Food and non-alcoholic beverages
+49,"Soups, spices and sauces",0.539,,Food and non-alcoholic beverages
+50,Ready-made foods,0.242,,Food and non-alcoholic beverages
+51,Coffee,0.289,,Food and non-alcoholic beverages
+52,Tea,0.059,,Food and non-alcoholic beverages
+53,Cocoa and nutritional beverages,0.033,,Food and non-alcoholic beverages
+54,Natural mineral water,0.173,,Food and non-alcoholic beverages
+55,Soft drinks,0.273,,Food and non-alcoholic beverages
+56,Fruit and vegetable juices,0.177,,Food and non-alcoholic beverages
+57,Spirits and brandies,0.095,,Alcoholic beverages and tobacco
+58,Liqueurs and aperitifs,0.049,,Alcoholic beverages and tobacco
+59,Swiss red wine,0.156,,Alcoholic beverages and tobacco
+60,Foreign red wine,0.421,,Alcoholic beverages and tobacco
+61,Swiss white wine,0.12,,Alcoholic beverages and tobacco
+62,Foreign white wine,0.057,,Alcoholic beverages and tobacco
+63,Sparkling wine,0.083,,Alcoholic beverages and tobacco
+64,Beer,0.132,,Alcoholic beverages and tobacco
+65,Cigarettes,0.619,,Alcoholic beverages and tobacco
+66,Other tobaccos,0.032,,Alcoholic beverages and tobacco
+67,Coats and jackets (Men),0.19,,Clothing and footwear
+68,Suits (Men),0.137,,Clothing and footwear
+69,Trousers (Men),0.219,,Clothing and footwear
+70,Shirts (Men),0.112,,Clothing and footwear
+71,Sweaters (Men),0.191,,Clothing and footwear
+72,Underwear (Men),0.1,,Clothing and footwear
+73,Coats and jackets (Women),0.053,,Clothing and footwear
+74,Skirts (Women),0.23,,Clothing and footwear
+75,Trousers (Women),0.339,,Clothing and footwear
+76,Jackets (Women),0.348,,Clothing and footwear
+77,Blouses (Women),0.124,,Clothing and footwear
+78,Jumpers (Women),0.459,,Clothing and footwear
+79,Underwear (Women),0.259,,Clothing and footwear
+80,Coats and jackets (Children),0.026,,Clothing and footwear
+81,Trousers and skirts (Children),0.064,,Clothing and footwear
+82,Jerseys (Children),0.068,,Clothing and footwear
+83,Baby clothes,0.09,,Clothing and footwear
+84,Hosiery and underwear (Children),0.049,,Clothing and footwear
+85,Sportswear,0.022,,Clothing and footwear
+86,Garment fabrics,0.027,,Clothing and footwear
+87,Haberdashery and knitting wool,0.018,,Clothing and footwear
+88,Garment alterations,0.066,,Clothing and footwear
+89,Upkeep of textiles,0.454,,Clothing and footwear
+90,Footwear (Women),0.271,,Clothing and footwear
+91,Footwear (Men),0.122,,Clothing and footwear
+92,Footwear (Children),0.022,,Clothing and footwear
+93,Shoe repairs,0.241,,Clothing and footwear
+94,Rents,19.499,,Rents
+95,Rental of garages and parking spaces,0.685,,Housing and energy (excl. oil products and rents)
+96,Products for housing maintenance and repair,0.086,,Housing and energy (excl. oil products and rents)
+97,Services for housing maintenance and repair,1.167,,Housing and energy (excl. oil products and rents)
+98,Natural gas,0.506,,Housing and energy (excl. oil products and rents)
+99,Electricity,1.931,,Housing and energy (excl. oil products and rents)
+100,Heating oil,1.282,,Oil products
+101,Remote heating,0.086,,Housing and energy (excl. oil products and rents)
+102,Furniture for living room,0.729,,"Furnishings, household equipment and routine maintenance of the house"
+103,Furniture for bedroom,0.485,,"Furnishings, household equipment and routine maintenance of the house"
+104,Furniture for kitchen and garden,0.259,,"Furnishings, household equipment and routine maintenance of the house"
+105,Furnishings,0.31,,"Furnishings, household equipment and routine maintenance of the house"
+106,Floor coverings and carpets,0.082,,"Furnishings, household equipment and routine maintenance of the house"
+107,Bed linen and household linen,0.228,,"Furnishings, household equipment and routine maintenance of the house"
+108,Curtains and curtain accessories,0.093,,"Furnishings, household equipment and routine maintenance of the house"
+109,Major household appliances,0.362,,"Furnishings, household equipment and routine maintenance of the house"
+110,Smaller electric household appliances,0.324,,"Furnishings, household equipment and routine maintenance of the house"
+111,Kitchen utensils,0.143,,"Furnishings, household equipment and routine maintenance of the house"
+112,Tableware and cutlery,0.111,,"Furnishings, household equipment and routine maintenance of the house"
+113,Motorised tools for DIY and garden,0.094,,"Furnishings, household equipment and routine maintenance of the house"
+114,Tools for house and garden,0.077,,"Furnishings, household equipment and routine maintenance of the house"
+115,Detergents and cleaning products,0.339,,"Furnishings, household equipment and routine maintenance of the house"
+116,Cleaning articles,0.019,,"Furnishings, household equipment and routine maintenance of the house"
+117,Other household articles,0.223,,"Furnishings, household equipment and routine maintenance of the house"
+118,Medicines,2.313,,Health
+119,Medical products,0.439,,Health
+120,Therapeutic appliances,3.305,,Health
+121,Medical services,1.492,,Health
+122,Dental services,0.946,,Health
+123,Other health services,5.321,,Health
+124,Hospital services,0.046,,Health
+125,New cars,2.91,,Transport (excl. oil products)
+126,Motorcycles,0.25,,Transport (excl. oil products)
+127,Bicycles,0.269,,Transport (excl. oil products)
+128,Spare parts,0.051,,Transport (excl. oil products)
+129,Tyres and accessories,0.223,,Transport (excl. oil products)
+130,Fuels,2.368,,Oil products
+131,Repair services,1.165,,Transport (excl. oil products)
+132,Other services in respect of personal transport equipment,0.434,,Transport (excl. oil products)
+133,Public transport: direct service,1.014,,Transport (excl. oil products)
+134,Public transport: combined services,0.574,,Transport (excl. oil products)
+135,Taxi,0.071,,Transport (excl. oil products)
+136,Postal services,0.107,,Communication
+137,Telephone equipment,0.098,,Communication
+138,Telecommunication,2.58,,Communication
+139,TV and audiovisual appliances,0.521,,Recreation and culture
+140,"Photographic, cinematographic equipment and optical instruments",0.129,,Recreation and culture
+141,PC hardware,0.463,,Recreation and culture
+142,Computer software,0.029,,Recreation and culture
+143,Recording media,0.236,,Recreation and culture
+144,Repair and installation,0.039,,Recreation and culture
+145,"Games, toys and hobbies",0.423,,Recreation and culture
+146,Sports equipment,0.387,,Recreation and culture
+147,Plants and flowers,0.513,,Recreation and culture
+148,Pets and related products,0.36,,Recreation and culture
+149,Sporting events,0.052,,Recreation and culture
+150,Sports and leisure activities,0.5,,Recreation and culture
+151,Mountain railways and ski lifts,0.226,,Recreation and culture
+152,Cinema,0.115,,Recreation and culture
+153,Theatre and concerts,0.35,,Recreation and culture
+154,Radio and television licences,0.879,,Recreation and culture
+155,Photographic services,0.112,,Recreation and culture
+156,Leisure-time courses,0.63,,Recreation and culture
+157,Books and brochures,0.328,,Recreation and culture
+158,"Newspapers, purchased singly",0.132,,Recreation and culture
+159,"Newspapers, by subscription",0.481,,Recreation and culture
+160,Writing and drawing materials,0.168,,Recreation and culture
+161,Package holidays,2.889,,Recreation and culture
+162,Education,0.669,,Education
+163,Meals taken in restaurants and cafés,3.19,,Restaurants and hotels
+164,Wine taken in restaurants and cafés,0.646,,Restaurants and hotels
+165,Beer taken in restaurants and cafés,0.321,,Restaurants and hotels
+166,Spirits and other alcoholic drinks taken in restaurants and cafés,0.106,,Restaurants and hotels
+167,Coffee and tea taken in restaurants and cafés,0.604,,Restaurants and hotels
+168,Mineral water and soft drinks taken in restaurants and cafés,0.513,,Restaurants and hotels
+169,Other non-alcoholic beverages taken in restaurants and cafés,0.047,,Restaurants and hotels
+170,Meals in canteens,0.546,,Restaurants and hotels
+171,Beverages in canteens,0.155,,Restaurants and hotels
+172,Hotels,0.707,,Restaurants and hotels
+173,Alternative accommodation facilities,0.275,,Restaurants and hotels
+174,Hairdressing establishments,0.889,,Miscellaneous goods and services
+175,Soaps and foam baths,0.074,,Miscellaneous goods and services
+176,Hair-care products,0.12,,Miscellaneous goods and services
+177,Dental-care products,0.059,,Miscellaneous goods and services
+178,Beauty products and cosmetics,0.609,,Miscellaneous goods and services
+179,Paper articles for personal hygiene,0.226,,Miscellaneous goods and services
+180,Personal care appliances,0.144,,Miscellaneous goods and services
+181,Watches,0.459,,Miscellaneous goods and services
+182,Other personal effects,0.243,,Miscellaneous goods and services

@@ -1,0 +1,25 @@
+model,subaggregate,weight_2010
+,sub-aggrEgatEs oF swIss CPI ARIMA (1) Total CPI,100.0
+ARIMA(6),Domestic durable goods,16.875
+ARIMA(6),Domestic private services,27.818
+ARIMA(6),Rents,19.499
+ARIMA(6),Public services,8.711
+ARIMA(6),Imported goods and services excl. oil products,23.447
+ARIMA(6),Oil products,3.65
+ARIMA(6),TOTAL,100.0
+ARIMA(14),Food and non-alcoholic beverages,11.063
+ARIMA(14),Alcoholic beverages and tobacco,1.764
+ARIMA(14),Clothing and footwear,4.454
+ARIMA(14),Housing and energy (excl. oil products and rents),4.972
+ARIMA(14),Oil products,3.65
+ARIMA(14),Rents,19.499
+ARIMA(14),"Furnishings, household equipment and routine maintenance of the house",4.635
+ARIMA(14),Health,13.862
+ARIMA(14),Transport (excl. oil products),8.643
+ARIMA(14),Communication,2.785
+ARIMA(14),Recreation and culture,10.356
+ARIMA(14),Education,0.669
+ARIMA(14),Restaurants and hotels,8.426
+ARIMA(14),Miscellaneous goods and services,5.222
+ARIMA(14),TOTAL,100.0
+ARIMA(182),TOTAL,92.788

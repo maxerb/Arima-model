@@ -43,3 +43,11 @@ Every series also has a row in `codebook.csv`.
   https://www.bwo.admin.ch/de/entwicklung-referenzzinssatz-und-durchschnittszinssatz renders its table by JavaScript,
   no file link). Only needed if D-19 is changed back to the BWO series; then copy the table by hand into `data/meta/`.
 - Licence: FRED data with source attribution; SNB data portal free use with attribution ("Quelle: SNB").
+
+## Paper appendix tables (T1.3)
+- Source: Huwiler & Kaufmann (2013), SNB Economic Studies 7/2013, PDF downloaded by `scripts/00_download_paper.py`
+  (URL in that script, public, checked 2026-11-24) to `data/raw/economic_studies_2013_07_<date>.pdf`.
+- Table 9 (PDF pp. 23-27) -> `data/meta/items_paper_table9.csv` and `data/meta/paper_table9_subaggregates.csv`,
+  parsed from the PDF text layer by `scripts/01_transcribe_paper_tables.py`.
+- Tables 5-8 (PDF pp. 19-23) -> `data/meta/collection_calendar_paper.csv`, transcribed by hand from page images
+  (`scripts/explore/render_paper_pages.py`); the script checks the number of collection marks per table against the PDF.

@@ -1,0 +1,163 @@
+table,period,level,group,item,months
+5,2000-2005,group,Food and non-alcoholic beverages,,1;2;3;4;5;6;7;8;9;10;11;12
+5,2000-2005,item,Food and non-alcoholic beverages,Biscuit products,3;6;9;12
+5,2000-2005,item,Food and non-alcoholic beverages,Tinned products,3;6;9;12
+5,2000-2005,item,Food and non-alcoholic beverages,Frozen products,3;6;9;12
+5,2000-2005,item,Food and non-alcoholic beverages,Sweets,3;6;9;12
+5,2000-2005,item,Food and non-alcoholic beverages,Other food,3;6;9;12
+5,2000-2005,item,Food and non-alcoholic beverages,Beverages,3;6;9;12
+5,2000-2005,group,Alcoholic beverages and tobacco,,3;6;9;12
+5,2000-2005,group,Clothing and footwear,,2;5;8;11
+5,2000-2005,group,Housing and energy,,2;5;8;11
+5,2000-2005,item,Housing and energy,Heating oil,1;2;3;4;5;6;7;8;9;10;11;12
+5,2000-2005,item,Housing and energy,Charges,aperiodic
+5,2000-2005,item,Housing and energy,"Natural gas, electricity, remote heating",aperiodic
+5,2000-2005,group,"Furnishings, household equipment and routine house maintenance",,3;6;9;12
+5,2000-2005,group,Health,,1;4;7;10
+5,2000-2005,item,Health,Medical services,aperiodic
+5,2000-2005,item,Health,Other health services,aperiodic
+5,2000-2005,item,Health,Hospital services,aperiodic
+5,2000-2005,group,Transport,,1;4;7;10
+5,2000-2005,item,Transport,Fuels,1;2;3;4;5;6;7;8;9;10;11;12
+5,2000-2005,item,Transport,Public transport,aperiodic
+5,2000-2005,group,Communication,,3;6;9;12
+5,2000-2005,item,Communication,Postal services,aperiodic
+5,2000-2005,item,Communication,Telecommunication,aperiodic
+5,2000-2005,group,Recreation and culture,,3;6;9;12
+5,2000-2005,item,Recreation and culture,Sporting events (soccer),6
+5,2000-2005,item,Recreation and culture,Sporting events (ice hockey),9
+5,2000-2005,item,Recreation and culture,Sports and leisure activities (public swimming baths),6;9
+5,2000-2005,item,Recreation and culture,Sports and leisure activities (skating rinks),9
+5,2000-2005,item,Recreation and culture,Radio and television licences,aperiodic
+5,2000-2005,group,Education,,3;9
+5,2000-2005,group,Restaurants and hotels,,1;4;7;10
+5,2000-2005,item,Restaurants and hotels,Camping,4
+5,2000-2005,item,Restaurants and hotels,Alternative accommodation facilities,1;7
+5,2000-2005,group,Miscellaneous goods and services,,2;5;8;11
+6,2006-2007,group,Food and non-alcoholic beverages,,1;2;3;4;5;6;7;8;9;10;11;12
+6,2006-2007,item,Food and non-alcoholic beverages,Biscuit products,2;5;8;11
+6,2006-2007,item,Food and non-alcoholic beverages,Tinned products,2;5;8;11
+6,2006-2007,item,Food and non-alcoholic beverages,Frozen products,2;5;8;11
+6,2006-2007,item,Food and non-alcoholic beverages,Sweets,2;5;8;11
+6,2006-2007,item,Food and non-alcoholic beverages,Other food,2;5;8;11
+6,2006-2007,item,Food and non-alcoholic beverages,Beverages,2;5;8;11
+6,2006-2007,group,Alcoholic beverages and tobacco,,3;6;9;12
+6,2006-2007,group,Clothing and footwear,,1;4;7;10
+6,2006-2007,group,Housing and energy,,2;5;8;11
+6,2006-2007,item,Housing and energy,Heating oil,1;2;3;4;5;6;7;8;9;10;11;12
+6,2006-2007,item,Housing and energy,Charges,aperiodic
+6,2006-2007,item,Housing and energy,"Natural gas, electricity, remote heating",aperiodic
+6,2006-2007,item,Housing and energy,Wood,4;10
+6,2006-2007,group,"Furnishings, household equipment and routine house maintenance",,3;6;9;12
+6,2006-2007,group,Health,,1;4;7;10
+6,2006-2007,item,Health,Medical services,aperiodic
+6,2006-2007,item,Health,Other health services,aperiodic
+6,2006-2007,item,Health,Hospital services,aperiodic
+6,2006-2007,group,Transport,,1;4;7;10
+6,2006-2007,item,Transport,Fuels,1;2;3;4;5;6;7;8;9;10;11;12
+6,2006-2007,item,Transport,Public transport,aperiodic
+6,2006-2007,group,Communication,,3;6;9;12
+6,2006-2007,item,Communication,Postal services,aperiodic
+6,2006-2007,item,Communication,Telecommunication,aperiodic
+6,2006-2007,group,Recreation and culture,,3;6;9;12
+6,2006-2007,item,Recreation and culture,Sports equipment,1;4;7;10
+6,2006-2007,item,Recreation and culture,Sporting events (soccer),6;9
+6,2006-2007,item,Recreation and culture,Sporting events (ice hockey),9;12
+6,2006-2007,item,Recreation and culture,Sports and leisure activities (public swimming baths),6;9
+6,2006-2007,item,Recreation and culture,Sports and leisure activities (skating rinks),9;12
+6,2006-2007,item,Recreation and culture,Radio and television licences,aperiodic
+6,2006-2007,group,Education,,3;9
+6,2006-2007,item,Education,Life-long learning,3;6;9;12
+6,2006-2007,group,Restaurants and hotels,,1;4;7;10
+6,2006-2007,item,Restaurants and hotels,Alternative accommodation facilities,1;7
+6,2006-2007,group,Miscellaneous goods and services,,2;5;8;11
+7,2008-2010,group,Food and non-alcoholic beverages,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,group,Alcoholic beverages and tobacco,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Alcoholic beverages and tobacco,Tobacco,3;6;9;12
+7,2008-2010,group,Clothing and footwear,,1;4;6;7;10;12
+7,2008-2010,item,Clothing and footwear,Upkeep of textiles and garment alterations,1;4;7;10
+7,2008-2010,item,Clothing and footwear,Shoe repairs,1;4;7;10
+7,2008-2010,group,Housing and energy,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Housing and energy,Rent,2;5;8;11
+7,2008-2010,item,Housing and energy,Charges,aperiodic
+7,2008-2010,item,Housing and energy,"Natural gas, electricity, remote heating",aperiodic
+7,2008-2010,group,"Furnishings, household equipment and routine house maintenance",,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,"Furnishings, household equipment and routine house maintenance","Furniture, furnishings and floor coverings",1;3;6;7;9;12
+7,2008-2010,item,"Furnishings, household equipment and routine house maintenance",Household cleaning services,3;6;9;12
+7,2008-2010,group,Health,,aperiodic
+7,2008-2010,item,Health,Medicines and medical products,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Health,Therapeutic appliances,1;4;7;10
+7,2008-2010,item,Health,Dental services,1;4;7;10
+7,2008-2010,group,Transport,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Transport,Repair services and work,1;4;7;10
+7,2008-2010,item,Transport,Other services in respect of personal transport equipment,1;4;7;10
+7,2008-2010,item,Transport,Public transport,aperiodic
+7,2008-2010,item,Transport,Taxi,1;4;7;10
+7,2008-2010,group,Communication,,aperiodic
+7,2008-2010,item,Communication,Telephone equipment,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,group,Recreation and culture,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Recreation and culture,Musical instruments,3;6;9;12
+7,2008-2010,item,Recreation and culture,Sports equipment,1;4;6;7;10;12
+7,2008-2010,item,Recreation and culture,Sporting events (soccer),6;9
+7,2008-2010,item,Recreation and culture,Sporting events (ice hockey),9;12
+7,2008-2010,item,Recreation and culture,Sports and leisure activities (public swimming baths),6;9
+7,2008-2010,item,Recreation and culture,Sports and leisure activities (skating rinks),9;12
+7,2008-2010,item,Recreation and culture,"Cinema, theatre, concerts, leisure-time courses",3;6;9;12
+7,2008-2010,item,Recreation and culture,Radio and television licences,aperiodic
+7,2008-2010,item,Recreation and culture,"Books, newspapers and stationery",3;6;9;12
+7,2008-2010,group,Education,,9;12
+7,2008-2010,item,Education,Life-long learning,3;6;9;12
+7,2008-2010,group,Restaurants and hotels,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Restaurants and hotels,Canteens,1;4;7;10
+7,2008-2010,item,Restaurants and hotels,Alternative accommodation facilities,1;4;7;10
+7,2008-2010,group,Miscellaneous goods and services,,1;2;3;4;5;6;7;8;9;10;11;12
+7,2008-2010,item,Miscellaneous goods and services,Hairdressing establishments,2;5;8;11
+7,2008-2010,item,Miscellaneous goods and services,Social protection services,2;5;8;11
+7,2008-2010,item,Miscellaneous goods and services,Insurance,aperiodic
+7,2008-2010,item,Miscellaneous goods and services,Financial services,2;5;8;11
+8,2011-,group,Food and non-alcoholic beverages,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Food and non-alcoholic beverages,Fruits (various),seasonal
+8,2011-,item,Food and non-alcoholic beverages,Vegetables (various),seasonal
+8,2011-,group,Alcoholic beverages and tobacco,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Alcoholic beverages and tobacco,Tobacco,3;6;9;12
+8,2011-,group,Clothing and footwear,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Clothing and footwear,Upkeep of textiles and garment alterations,1;4;7;10
+8,2011-,item,Clothing and footwear,Shoe repairs,1;4;7;10
+8,2011-,group,Housing and energy,,2;5;8;11
+8,2011-,item,Housing and energy,Charges,aperiodic
+8,2011-,item,Housing and energy,Heating oil,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Housing and energy,"Natural gas, electricity, remote heating",aperiodic
+8,2011-,item,Housing and energy,Wood,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,group,"Furnishings, household equipment and routine house maintenance",,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,"Furnishings, household equipment and routine house maintenance",Household cleaning services,3;6;9;12
+8,2011-,group,Health,,aperiodic
+8,2011-,item,Health,Medicines,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Health,Therapeutic appliances,1;4;7;10
+8,2011-,item,Health,Dental services,1;4;7;10
+8,2011-,group,Transport,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Transport,Repair services and work,1;4;7;10
+8,2011-,item,Transport,Other services in respect of personal transport equipment,1;4;7;10
+8,2011-,item,Transport,Public transport,aperiodic
+8,2011-,item,Transport,Taxi,1;4;7;10
+8,2011-,group,Communication,,aperiodic
+8,2011-,item,Communication,Telephone equipment,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,group,Recreation and culture,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Recreation and culture,Musical instruments,3;6;9;12
+8,2011-,item,Recreation and culture,Winter sports equipment,seasonal
+8,2011-,item,Recreation and culture,Veterinary services for pets,3;6;9;12
+8,2011-,item,Recreation and culture,Sporting events (soccer),8
+8,2011-,item,Recreation and culture,Sporting events (ice hockey),3;9
+8,2011-,item,Recreation and culture,Sports and leisure activities (public swimming baths),6
+8,2011-,item,Recreation and culture,"Theatre, concerts",9
+8,2011-,item,Recreation and culture,"Mountain railways, ski lifts",6;12
+8,2011-,item,Recreation and culture,Radio and television licences,aperiodic
+8,2011-,group,Education,,9;12
+8,2011-,item,Education,Life-long learning,3;9
+8,2011-,group,Restaurants and hotels,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Restaurants and hotels,Canteens,1;4;7;10
+8,2011-,item,Restaurants and hotels,Alternative accommodation facilities,1;4;7;10
+8,2011-,group,Miscellaneous goods and services,,1;2;3;4;5;6;7;8;9;10;11;12
+8,2011-,item,Miscellaneous goods and services,Hairdressing establishments,2;5;8;11
+8,2011-,item,Miscellaneous goods and services,Social protection services,2;5;8;11
+8,2011-,item,Miscellaneous goods and services,Insurance,aperiodic
+8,2011-,item,Miscellaneous goods and services,Financial services,2;5;8;11

@@ -24,3 +24,6 @@ typing_extensions==4.16.0
 tzdata==2026.6
 urllib3==2.8.0
 wrapt==2.6.0.dev1
+pypdf==5.1.0
+pypdfium2==4.30.0
+pillow==13.0.0
