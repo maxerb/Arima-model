@@ -1,0 +1,54 @@
+calendar_item,item_ids,note
+Biscuit products,i006,
+Tinned products,i019;i034;i042,"tinned fish, dried/frozen/tinned fruit and vegetables (mixed categories; first match wins over Frozen products)"
+Frozen products,i018,frozen fish
+Sweets,i046,
+Other food,i044;i048;i049;i050,"jam/honey, sugar, soups/spices/sauces, ready-made foods (BFS 'Andere Nahrungsmittel'; our reading)"
+Beverages,i051;i052;i053;i054;i055;i056,non-alcoholic beverages
+Fruits (various),i029;i030;i031;i032;i033,
+Vegetables (various),i035;i036;i037;i038;i039;i040,
+Tobacco,i065;i066,
+Upkeep of textiles and garment alterations,i088;i089,
+Shoe repairs,i093,
+Rent,i094,
+Heating oil,i100,
+"Natural gas, electricity, remote heating",i098;i099;i101,
+"Furniture, furnishings and floor coverings",i102;i103;i104;i105;i106,
+Medicines and medical products,i118;i119,
+Medicines,i118,
+Therapeutic appliances,i120,
+Medical services,i121,
+Dental services,i122,
+Other health services,i123,
+Hospital services,i124,
+Fuels,i130,
+Repair services and work,i131,
+Other services in respect of personal transport equipment,i132,
+Public transport,i133;i134,
+Taxi,i135,
+Postal services,i136,
+Telephone equipment,i137,
+Telecommunication,i138,
+Sports equipment,i146,
+Sporting events (ice hockey),i149,several sub-events: months are combined (union)
+Sporting events (soccer),i149,
+Sports and leisure activities (public swimming baths),i150,several sub-activities: months are combined (union)
+Sports and leisure activities (skating rinks),i150,
+"Mountain railways, ski lifts",i151,
+"Cinema, theatre, concerts, leisure-time courses",i152;i153;i156,
+"Theatre, concerts",i153,
+Radio and television licences,i154,
+"Books, newspapers and stationery",i157;i158;i159;i160,
+Canteens,i170;i171,
+Alternative accommodation facilities,i173,
+Hairdressing establishments,i174,
+Winter sports equipment,,part of i146 (sports equipment); not applied
+Musical instruments,,not a model item
+Wood,,not a model item
+Charges,,not a model item (rent charges)
+Household cleaning services,,not a model item
+Camping,,not a model item
+Life-long learning,,"sub-item of education; i162 follows the Education group row"
+Financial services,,not a model item
+Insurance,,not a model item
+Social protection services,,not a model item

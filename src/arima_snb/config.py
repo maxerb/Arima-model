@@ -53,6 +53,7 @@ MIN_OBS_QUARTERLY = 12
 # Collection frequency (paper fn. 9)
 # ---------------------------------------------------------------------------
 NO_COLLECTION_TOL = 1e-3           # |log change| below this counts as "not collected"
+CALENDAR_LAST_YEAR = 2012          # D-28: paper's "2011-" calendar (Table 8) applied up to the paper's writing
 
 # ---------------------------------------------------------------------------
 # Reproducibility

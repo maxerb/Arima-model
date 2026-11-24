@@ -65,3 +65,12 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - agg6 follow-up (2026-11-24): BFS methods PDFs (2005, 2010 bases) publish domestic/imported and goods/services only as totals (Anhang 2), no per-position list. Membership regression on BFS grouping series (`src/arima_snb/classify.py`) reproduces the paper's ARIMA(6) totals on the full basket (16.3/28.2/18.9/8.6/23.9 vs 16.9/27.8/19.5/8.7/23.4) but item-level labels are not identified (e.g. margarine -> public services). Not wired into the pipeline; awaiting user decision.
 
 - agg6 resolved with user (rules + data check, D-21 rev.). Candidate skill edit (snb-arima-cpi-panel step 4): agg6 is not in Table 9 nor in BFS files; use data/meta/agg6_rules.csv + classify.item_agg6.
+
+## T1.5 micro retro (2026-11-24, snb-arima-cpi-panel)
+- Wrong input found: paper Table 9 prints weights one row off in two blocks (items 85–93, 119–124); T1.4's weight matching inherited it (shoe repairs mapped twice). Fixed by name overrides (D-22 rev.). Candidate edit (step 1 / checks): "after weight matching, read the English↔German name pairs once and assert no BFS position is used by two items unless a documented merge".
+- Skill step 3 says "before annual updating the weight is constant between revisions" — wrong for BFS: GEWICHTUNGEN has a new weight column every year from 2002 (2000/01 for 2000–01, one 1993 column). Candidate edit: replace with "use the GEWICHTUNGEN column of each year; 1993 column covers 1993–99, 2000/01 covers 2000–01 (D-26)".
+- Skill step 3 does not cover one position carrying several items (merge in a later basket); asked user (D-27: split by last separate shares). Candidate edit: add the rule.
+- Skill step 5 assumes calendar rows name model items; in fact they are BFS sub-groups. Improvised `data/meta/collection_calendar_items.csv`. Candidate edit: mention the hand map.
+- Check "2010 coverage ≈ 92.8 %" is 92.70 with true BFS weights (paper's skirts weight 0.230 vs BFS 0.143). Candidate edit to the check value.
+- Tooling: Bash `sed 's/\|...\|/'` (escaped pipes) matched the empty string and corrupted every line of decisions.md; reverted. Use Python for edits containing `|`.
+- Observation for T5.1: coverage drops to 86–88 % from 2016 and 60 % in 2026 (2015 splits such as package holidays abroad/domestic and hospital in/outpatient map to one child only; 54 items without 2025 link, D-25).

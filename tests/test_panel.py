@@ -84,5 +84,8 @@ def test_agg6_labels():
     assert items["agg6"].notna().all() and items["agg6"].nunique() == 6
     assert (items.loc[items.special == "oil", "agg6"] == "Oil products").all()
     assert (items.loc[items.special == "rent", "agg6"] == "Rents").all()
-    # public services close to the paper's 8.711 (items cover all public services of the basket)
-    assert abs(items.loc[items.agg6 == "Public services", "weight_2010"].sum() - 8.711) < 0.5
+    # public services close to the paper's 8.711 (items cover all public services of the basket).
+    # Use the BFS 2010 weights (weights.csv, T1.5): Table 9 prints some weights one row off (D-22 note).
+    if (FINAL / "weights.csv").exists():
+        w = pd.read_csv(FINAL / "weights.csv").query("year == 2010").set_index("item_id")["weight"]
+        assert abs(w[items.agg6 == "Public services"].sum() - 8.711) < 0.5

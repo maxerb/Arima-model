@@ -450,6 +450,135 @@ def backcast_agreement(mapping: pd.DataFrame, panel: pd.DataFrame, months: int =
     return pd.DataFrame(rows)
 
 
+# ---------------------------------------------------------------------------
+# Step 4 (T1.5): annual weights per model item
+# ---------------------------------------------------------------------------
+def weight_years(sheet: str) -> dict[int, list[int]]:
+    """Calendar years for which each BFS weight column of a basket is valid (D-26).
+
+    Weights of year y hold from December of y-1 (the price base) through December of y, i.e. they steer
+    the index in Jan-Dec of y. Exceptions: the 1993 basket has one weight column for 1993-1999, and the
+    2000 basket's column "2000/01" (stored as 2000) covers 2000 and 2001 (link month May 2000).
+    """
+    years = sorted(load_weights().query("basket == @sheet")["year"].unique())
+    if sheet == "LIK1993":
+        return {1993: list(range(1993, 2000))}
+    if sheet == "LIK2000":
+        return {y: ([2000, 2001] if y == 2000 else [y]) for y in years}
+    return {y: [y] for y in years}
+
+
+def item_weights(mapping: pd.DataFrame) -> pd.DataFrame:
+    """Weights per model item and calendar year from the BFS GEWICHTUNGEN file (D-26).
+
+    Item weight = sum of the weights of its BFS position(s) in that basket (split items: children summed).
+    If one position carries several model items (women's coats + jackets from 2016), its weight is split
+    by the items' shares in the last year with separate weights (D-27).
+    Items without a position in a basket get no row for those years (coverage then falls below 2010's 92.8).
+    Returns long frame: year, item_id, weight (BFS units, full basket = 100; not normalised).
+    """
+    w = load_weights().drop_duplicates(["basket", "pos_no", "year"])  # first occurrence = basket position (D-18)
+    code_to_sheet = {c: s for c, s, _ in BASKETS}
+    rows = []
+    for _, r in mapping.iterrows():
+        if pd.isna(r.pos_nos) or str(r.pos_nos) == "":
+            continue
+        sheet = code_to_sheet[r.base]
+        nos = [int(float(p)) for p in str(r.pos_nos).split(";")]
+        wb = w[(w.basket == sheet) & w.pos_no.isin(nos)]
+        for wy, g in wb.groupby("year"):
+            for y in weight_years(sheet)[wy]:
+                rows.append({"year": y, "item_id": r.item_id, "pos_key": f"{sheet}:{r.pos_nos}",
+                             "weight": g["weight"].sum()})
+    out = pd.DataFrame(rows)
+
+    # D-27: a position shared by several items -> split by the items' last separate weights
+    n_items = out.groupby(["year", "pos_key"])["item_id"].transform("nunique")
+    for (year, _key), g in out[n_items > 1].groupby(["year", "pos_key"]):
+        ids = g["item_id"].tolist()
+        sep = out[out.item_id.isin(ids) & (n_items == 1) & (out.year < year)]
+        last = sep[sep.year == sep.year.max()].set_index("item_id")["weight"].reindex(ids)
+        share = last / last.sum()
+        out.loc[g.index, "weight"] = g["weight"] * g["item_id"].map(share)
+    return out.drop(columns="pos_key").sort_values(["year", "item_id"]).reset_index(drop=True)
+
+
+# ---------------------------------------------------------------------------
+# Step 5 (T1.5): collection calendar (official from the paper + inferred from the data)
+# ---------------------------------------------------------------------------
 def infer_collection(log_p: pd.Series, tol: float = NO_COLLECTION_TOL) -> pd.Series:
-    """Flag months where the price was collected: |change in log price| >= tol (paper fn. 9)."""
-    raise NotImplementedError("T1.5")
+    """Flag months where the price was collected: |change in log price| >= tol (paper fn. 9).
+
+    A flat month is read as "not collected" (price carried forward, AGENTS.md §7). The first observation has
+    no change and is returned as NaN (unknown).
+    """
+    d = log_p.diff().abs()
+    return (d >= tol).where(d.notna())
+
+
+def _calendar_years(period: str, last_year: int) -> list[int]:
+    """Years covered by a paper calendar table ("2000-2005", ..., "2011-" = 2011..last_year, D-28)."""
+    a, _, b = period.partition("-")
+    return list(range(int(a), (int(b) if b else last_year) + 1))
+
+
+def _division(items: pd.DataFrame) -> pd.Series:
+    """COICOP division (group label of the paper's calendar tables) per item, derived from agg14."""
+    div = items["agg14"].str.replace(r" \(excl\..*\)$", "", regex=True).replace({"Rents": "Housing and energy"})
+    div[items["item_id"] == "i100"] = "Housing and energy"   # heating oil
+    div[items["item_id"] == "i130"] = "Transport"            # fuels
+    return div.str[:20]   # the Furnishings label is worded differently after 20 characters
+
+
+def official_calendar(items: pd.DataFrame, last_year: int) -> pd.DataFrame:
+    """Official collection months per item and month from paper Tables 5-8 (D-28).
+
+    Item rows (mapped to model items in data/meta/collection_calendar_items.csv) override the group row of
+    the item's COICOP division; several item rows for one item are combined (union of months).
+    'aperiodic'/'seasonal' have no fixed months: collected = NaN and `pattern` keeps the label.
+    Starts May 2000 (Table 5 belongs to the May 2000 basket). Returns: date, item_id, collected, pattern.
+    """
+    cal = pd.read_csv(META / "collection_calendar_paper.csv")
+    cal["group"] = cal["group"].str.replace("\n", " ").str[:20]
+    cal["item"] = cal["item"].str.replace("\n", " ")
+    cmap = pd.read_csv(META / "collection_calendar_items.csv").dropna(subset=["item_ids"])
+    cmap = {r.calendar_item: r.item_ids.split(";") for r in cmap.itertuples()}
+    div = dict(zip(items["item_id"], _division(items)))
+
+    spec: dict[tuple[str, int], tuple[str, str]] = {}   # (item_id, year) -> (months, "group"/"item")
+    for r in cal[cal.level == "group"].itertuples():
+        for y in _calendar_years(r.period, last_year):
+            for i, d in div.items():
+                if d == r.group:
+                    spec[(i, y)] = (r.months, "group")
+    for r in cal[cal.level == "item"].itertuples():
+        for y in _calendar_years(r.period, last_year):
+            for i in cmap.get(r.item, []):
+                old, lvl = spec.get((i, y), ("", ""))
+                months = r.months
+                if lvl == "item" and old[:1].isdigit() and months[:1].isdigit():
+                    months = ";".join(sorted(set(old.split(";")) | set(months.split(";")), key=int))
+                spec[(i, y)] = (months, "item")
+
+    rows = []
+    for (i, y), (m, _lvl) in spec.items():
+        fixed = m[:1].isdigit()
+        months = {int(x) for x in m.split(";")} if fixed else set()
+        for mo in range(1, 13):
+            date = pd.Timestamp(year=y, month=mo, day=1)
+            if date >= pd.Timestamp("2000-05-01"):
+                rows.append({"date": date, "item_id": i,
+                             "collected": (mo in months) if fixed else np.nan, "pattern": m})
+    return pd.DataFrame(rows).sort_values(["item_id", "date"]).reset_index(drop=True)
+
+
+def collection_pattern(collection: pd.DataFrame, item_id: str, origin) -> list[int]:
+    """Months (1-12) in which an item was collected in the calendar year BEFORE the origin's year.
+
+    Real-time rule of the paper (pp. 14-15): at `origin` the forecaster knows the collection pattern only from
+    the previous complete year. Uses the inferred flags (source 'inferred').
+    """
+    origin = pd.Timestamp(origin)
+    c = collection[(collection.item_id == item_id) & (collection.source == "inferred")]
+    prev = c[pd.to_datetime(c.date).dt.year == origin.year - 1]
+    return sorted(pd.to_datetime(prev.loc[prev.collected == True, "date"]).dt.month.tolist())  # noqa: E712
