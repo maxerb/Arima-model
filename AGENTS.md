@@ -126,7 +126,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T2.4 | Rent model with asymmetric mortgage-rate effect | `snb-arima-oil-rent` | T1.2, T2.2 | done (2026-11-24; quarterly AR + lag-4 Δm± of SNB M_MV, sample 1993, D-15 rev., D-48, D-49; rent RMSFE ≈ paper Table 3) |
 | T2.5 | Aggregation to CPI, ARIMA(6), ARIMA(14), core; quarterly y-o-y | `snb-arima-aggregate` | T2.2 | done (2026-11-24; spliced chained Laspeyres with origin weights, total/excl. oil/agg6/agg14, h=1-5; ARIMA(1)=official CPI, D-45...D-47) |
 | **P3** | **Replication of the evaluation** | | | |
-| T3.1 | Pseudo-OOS engine (origins 2004–2011, 2 months known, h = 1–5) | `snb-arima-evaluation` | T2.5 | todo |
+| T3.1 | Pseudo-OOS engine (origins 2004–2011, 2 months known, h = 1–5) | `snb-arima-evaluation` | T2.5 | done (2026-11-24; 32 origins, expanding window, per-origin cache; arima182 RMSFE 0.08/0.46/0.73/0.94/1.03 ≈ paper Table 2; arima182_special = oil ECM + rent model; D-03/D-04 confirmed, D-50, D-51) |
 | T3.2 | Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional | `snb-arima-evaluation` | T3.1 | todo |
 | T3.3 | RMSFE, relative RMSFE, DMW-HLN → Tables 1–3 | `snb-arima-evaluation` | T3.2, T2.3, T2.4 | todo |
 | **P4** | **Extension from the paper** | | | |

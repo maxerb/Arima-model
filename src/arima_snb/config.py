@@ -114,3 +114,13 @@ SEASONAL_LAGS = (12, 24)           # D-33: seasonal if ACF at lag 12 or 24 posit
 FREQ_MONTHLY_MIN = 10              # D-34: collections per year >= 10 -> monthly
 FREQ_6X_MIN = 5                    # 5-9 -> "6x" (bimonthly-like), modelled monthly
 FREQ_QUARTERLY_MIN = 3             # 3-4 -> quarterly (lags 3, 6, 9, ...); 1-2 -> less than quarterly
+
+# ---------------------------------------------------------------------------
+# Pseudo-out-of-sample engine (T3.1, paper pp. 8-12, decisions D-03, D-04, D-50 ...)
+# ---------------------------------------------------------------------------
+OOS_N_JOBS = 7                     # worker processes for the item fits at each origin (~1-2 min/origin at 7 on 8 cores)
+# Paper RMSFE rows used as sanity targets (pp. 9 and 11; transcribed in docs/paper_spec.md §6), h = 1..5
+PAPER_RMSFE = {
+    "arima182": (0.08, 0.41, 0.72, 0.92, 1.04),          # Table 2, ARIMA(182) - plain ARIMA for oil and rents
+    "arima182_special": (0.04, 0.36, 0.66, 0.83, 0.96),  # Table 1, real-time ARIMA (closest analogue, D-50)
+}
