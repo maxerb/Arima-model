@@ -74,3 +74,10 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - Check "2010 coverage ≈ 92.8 %" is 92.70 with true BFS weights (paper's skirts weight 0.230 vs BFS 0.143). Candidate edit to the check value.
 - Tooling: Bash `sed 's/\|...\|/'` (escaped pipes) matched the empty string and corrupted every line of decisions.md; reverted. Use Python for edits containing `|`.
 - Observation for T5.1: coverage drops to 86–88 % from 2016 and 60 % in 2026 (2015 splits such as package holidays abroad/domestic and hospital in/outpatient map to one child only; 54 items without 2025 link, D-25).
+
+### T1.6 micro retro (2026-11-24, snb-arima-aggregate)
+- Skill interface `aggregate_index(item_log_p, ...)` takes log prices, but the Laspeyres formula needs index levels; implemented with levels (`item_index`). Candidate edit: rename the argument in the skill.
+- Skill says "verify the base month for 2000–2007 bases": answer is basket periods May 1993→May 2000 and May 2000→Dec 2001, then Dec-chaining yearly (D-29). Off-by-one: the old basket period must include the overlap month (May 2000) or the chain breaks — candidate edit: state this.
+- `build_subaggregate_series` needs the `items` table for groupings (signature in skill lacks it).
+- Tooling: matplotlib was not in requirements/venv; `pip install matplotlib==3.9.2` tried to build from source on this Python → use `--only-binary=:all:` (pinned 3.11.2).
+- Check passed: monthly y-o-y RMSE 0.067 pp (2001–2011); gaps > 0.2 pp only around the 2000 basket switch and 4 months 2018–2026.

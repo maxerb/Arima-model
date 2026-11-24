@@ -27,3 +27,4 @@ wrapt==2.6.0.dev1
 pypdf==5.1.0
 pypdfium2==4.30.0
 pillow==13.0.0
+matplotlib==3.11.2

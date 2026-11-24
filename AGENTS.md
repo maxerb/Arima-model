@@ -118,7 +118,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T1.3 | Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars) | `snb-arima-data` | – | done (2026-11-24; 182 items sum 92.788, calendars cross-checked vs PDF; agg6 per D-21 in T1.4) |
 | T1.4 | Build consistent item panel (chain-link bases, map items across revisions → ~182 items) | `snb-arima-cpi-panel` | T1.1, T1.3 | done (2026-11-24; 182 items 2000-05…, 134 from 1993, D-22…D-25; agg6 by rules + regression, D-21 rev.) |
 | T1.5 | Weights by year + collection calendar (official + inferred) | `snb-arima-cpi-panel` | T1.4 | done (2026-11-24; D-26…D-28, D-22 rev.: Table 9 row shifts fixed; trousers match Chart 1) |
-| T1.6 | Validate: re-aggregated CPI vs official (paper Chart 4) | `snb-arima-aggregate` | T1.5 | todo |
+| T1.6 | Validate: re-aggregated CPI vs official (paper Chart 4) | `snb-arima-aggregate` | T1.5 | done (2026-11-24; RMSE monthly y-o-y gap 0.07 pp 2001–2011, 0.11 pp 2016–2025; D-29, D-30) |
 | **P2** | **Item models** | | | |
 | T2.1 | Unit-root, seasonality, collection-frequency diagnostics → `item_specs.csv` | `snb-arima-item-diagnostics` | T1.5 | todo |
 | T2.2 | Per-item ARIMA with SIC selection + ad-hoc fallbacks, single-origin forecast | `snb-arima-item-models` | T2.1 | todo |

@@ -59,3 +59,12 @@ CALENDAR_LAST_YEAR = 2012          # D-28: paper's "2011-" calendar (Table 8) ap
 # Reproducibility
 # ---------------------------------------------------------------------------
 SEED = 20131
+
+# ---------------------------------------------------------------------------
+# Aggregation (T1.6, D-29): chaining periods before annual Dec-based chaining starts in 2002.
+# (weight_year in weights.csv, link month, first month, last month)
+# ---------------------------------------------------------------------------
+EARLY_WEIGHT_PERIODS = [
+    (1993, "1993-05-01", "1993-06-01", "2000-05-01"),   # 1993 basket, base May 1993; overlap month May 2000
+    (2000, "2000-05-01", "2000-06-01", "2001-12-01"),   # 2000 basket, "2000/01" weights, base May 2000
+]
