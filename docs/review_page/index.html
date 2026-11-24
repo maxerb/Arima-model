@@ -119,6 +119,17 @@ h3{font:700 16px/1.3 var(--f-display);margin:0}
 button.chip{cursor:pointer}
 button.chip:hover{background:var(--ink-soft)}
 .chip.status-todo{background:var(--surface-2)}
+.chip.status-doing{background:var(--warn-soft);color:var(--warn)}
+.chip.status-done{background:var(--ok-soft);color:var(--ok)}
+.chip.status-blocked{background:var(--bad-soft);color:var(--bad)}
+.task .tst{font:500 10.5px/1 var(--f-mono);padding:2px 5px;border-radius:999px}
+.task[data-status="done"]{background:var(--ok-soft)}
+.task[data-status="done"] .tst{color:var(--ok)}
+.task[data-status="doing"]{background:var(--warn-soft)}
+.task[data-status="doing"] .tst{color:var(--warn)}
+.task[data-status="blocked"]{background:var(--bad-soft)}
+.task[data-status="blocked"] .tst{color:var(--bad)}
+.kv dd.note{font-size:13px;color:var(--muted)}
 .chip.skill{background:var(--ink-soft);color:var(--ink)}
 
 /* review control */
@@ -212,6 +223,7 @@ form.fb textarea{min-height:96px;resize:vertical}
 .st-applied{background:var(--ok-soft);color:var(--ok)}
 .st-rejected{background:var(--bad-soft);color:var(--bad)}
 .st-deferred,.st-proposed{background:var(--surface-2);color:var(--muted)}
+.st-confirmed{background:var(--ok-soft);color:var(--ok)}
 
 /* open items */
 .opens{display:flex;flex-direction:column;gap:8px}
@@ -260,14 +272,14 @@ html{scroll-behavior:smooth}
 
 <main class="wrap">
   <section id="overview">
-    <p class="eyebrow">AGENTS.md · planning snapshot, 24 Nov 2026</p>
+    <p class="eyebrow" id="asof">AGENTS.md</p>
     <h1>Replicating the SNB's disaggregate ARIMA inflation model</h1>
     <p class="cite">Huwiler, M. and D. Kaufmann (2013). <em>Combining disaggregate forecasts for inflation: The SNB's ARIMA model.</em> SNB Economic Studies 7/2013.
       <a href="https://www.snb.ch/public/asset/de/www-snb-ch/publications/research/economic-studies/2013/03/economic_studies_2013_07/publications0/economic_studies_2013_07.n.pdf" target="_blank" rel="noopener">Open the PDF</a> to check page references.</p>
     <div class="stats">
-      <div class="stat"><div class="k">Tasks</div><div class="v" id="st-tasks">22</div><div class="s">7 phases · 0 done</div></div>
+      <div class="stat"><div class="k">Tasks done</div><div class="v" id="st-tasks">–</div><div class="s" id="st-tasks-s"></div></div>
       <div class="stat"><div class="k">Skills</div><div class="v">11</div><div class="s">10 task skills + feedback loop</div></div>
-      <div class="stat"><div class="k">Decisions confirmed</div><div class="v" id="st-dec">0 / 8</div><div class="s">where the paper is silent</div></div>
+      <div class="stat"><div class="k">Decisions confirmed</div><div class="v" id="st-dec">–</div><div class="s" id="st-dec-s">where the paper is silent</div></div>
       <div class="stat"><div class="k">Your review</div><div class="v" id="st-rev">0%</div><div class="s" id="st-rev-s">0 of 0 items checked</div></div>
     </div>
     <ol class="howto">
@@ -414,7 +426,8 @@ html{scroll-behavior:smooth}
     <li><code>AGENTS.md</code> — agent instructions, task board</li>
     <li><code>CLAUDE.md</code> — imports AGENTS.md</li>
     <li><code>docs/paper_spec.md</code> — paper summary, target tables</li>
-    <li><code>docs/decisions.md</code> — decision log D-01…D-08</li>
+    <li><code>docs/decisions.md</code> — decision log</li>
+    <li><code>scripts/build_review_page.py</code> — refreshes tasks and decisions on this page</li>
     <li><code>docs/skill_feedback.md</code> — feedback log</li>
     <li><code>.claude/skills/*/SKILL.md</code> — 11 skills</li>
   </ul>
@@ -424,13 +437,70 @@ html{scroll-behavior:smooth}
 (function(){
 "use strict";
 
-/* ---------- data (snapshot of the planning files) ---------- */
+/* ---------- data from the planning files (AGENTS.md §5, docs/decisions.md) ---------- */
+/* @generated-begin: scripts/build_review_page.py writes this block, do not edit by hand */
+const UPDATED = "2026-11-24";
+const BOARD = [
+  {"id": "T0.0", "ph": "P0", "title": "Make the repo standalone: git init, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader", "skill": "snb-arima-next-task", "deps": [], "status": "done", "note": "2026-11-24; KOF files kept out of git until licence checked"},
+  {"id": "T0.1", "ph": "P0", "title": "Create package skeleton, config.py, run_all.py, pytest setup", "skill": "snb-arima-next-task", "deps": ["T0.0"], "status": "done", "note": "2026-11-24; 16 tests pass, modules are stubs"},
+  {"id": "T0.2", "ph": "P0", "title": "Resolve gaps G1–G13 into initial decisions D-xx", "skill": "snb-arima-next-task", "deps": [], "status": "done", "note": "2026-11-24; D-01…D-17, key ones D-01/02/05/13 confirmed"},
+  {"id": "T1.1", "ph": "P1", "title": "Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year", "skill": "snb-arima-data", "deps": ["T0.1"], "status": "done", "note": "2026-11-24; 7 bases + GEWICHTUNGEN, loaders in io.py, D-18"},
+  {"id": "T1.2", "ph": "P1", "title": "Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts", "skill": "snb-arima-data", "deps": ["T0.1"], "status": "done", "note": "2026-11-24; FRED + 6 SNB cubes, D-19/D-20; consensus = KOF from T0.0"},
+  {"id": "T1.3", "ph": "P1", "title": "Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars)", "skill": "snb-arima-data", "deps": [], "status": "done", "note": "2026-11-24; 182 items sum 92.788, calendars cross-checked vs PDF; agg6 per D-21 in T1.4"},
+  {"id": "T1.4", "ph": "P1", "title": "Build consistent item panel (chain-link bases, map items across revisions → ~182 items)", "skill": "snb-arima-cpi-panel", "deps": ["T1.1", "T1.3"], "status": "done", "note": "2026-11-24; 182 items 2000-05…, 134 from 1993, D-22…D-25; agg6 still open, D-21"},
+  {"id": "T1.5", "ph": "P1", "title": "Weights by year + collection calendar (official + inferred)", "skill": "snb-arima-cpi-panel", "deps": ["T1.4"], "status": "todo", "note": ""},
+  {"id": "T1.6", "ph": "P1", "title": "Validate: re-aggregated CPI vs official (paper Chart 4)", "skill": "snb-arima-aggregate", "deps": ["T1.5"], "status": "todo", "note": ""},
+  {"id": "T2.1", "ph": "P2", "title": "Unit-root, seasonality, collection-frequency diagnostics → item_specs.csv", "skill": "snb-arima-item-diagnostics", "deps": ["T1.5"], "status": "todo", "note": ""},
+  {"id": "T2.2", "ph": "P2", "title": "Per-item ARIMA with SIC selection + ad-hoc fallbacks, single-origin forecast", "skill": "snb-arima-item-models", "deps": ["T2.1"], "status": "todo", "note": ""},
+  {"id": "T2.3", "ph": "P2", "title": "Oil-products ECM", "skill": "snb-arima-oil-rent", "deps": ["T1.2", "T2.2"], "status": "todo", "note": ""},
+  {"id": "T2.4", "ph": "P2", "title": "Rent model with asymmetric mortgage-rate effect", "skill": "snb-arima-oil-rent", "deps": ["T1.2", "T2.2"], "status": "todo", "note": ""},
+  {"id": "T2.5", "ph": "P2", "title": "Aggregation to CPI, ARIMA(6), ARIMA(14), core; quarterly y-o-y", "skill": "snb-arima-aggregate", "deps": ["T2.2"], "status": "todo", "note": ""},
+  {"id": "T3.1", "ph": "P3", "title": "Pseudo-OOS engine (origins 2004–2011, 2 months known, h = 1–5)", "skill": "snb-arima-evaluation", "deps": ["T2.5"], "status": "todo", "note": ""},
+  {"id": "T3.2", "ph": "P3", "title": "Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional", "skill": "snb-arima-evaluation", "deps": ["T3.1"], "status": "todo", "note": ""},
+  {"id": "T3.3", "ph": "P3", "title": "RMSFE, relative RMSFE, DMW-HLN → Tables 1–3", "skill": "snb-arima-evaluation", "deps": ["T3.2", "T2.3", "T2.4"], "status": "todo", "note": ""},
+  {"id": "T4.1", "ph": "P4", "title": "Collection-frequency state-space model (App. C), sample from 1993", "skill": "snb-arima-kalman-extension", "deps": ["T2.1"], "status": "todo", "note": ""},
+  {"id": "T4.2", "ph": "P4", "title": "Evaluate extended ARIMA(182) → Table 4", "skill": "snb-arima-evaluation", "deps": ["T4.1", "T3.1"], "status": "todo", "note": ""},
+  {"id": "T5.1", "ph": "P5", "title": "Extend evaluation to 2012–latest; sub-periods; robustness to decisions D-xx", "skill": "snb-arima-evaluation", "deps": ["T3.3"], "status": "todo", "note": ""},
+  {"id": "T5.2", "ph": "P5", "title": "(optional) Error decomposition: oil price and exchange-rate surprises (paper p. 9)", "skill": "snb-arima-evaluation", "deps": ["T3.3"], "status": "todo", "note": ""},
+  {"id": "T6.1", "ph": "P6", "title": "Paper-vs-replication comparison, LaTeX tables, figures, methods text", "skill": "snb-arima-report", "deps": ["T3.3"], "status": "todo", "note": ""}
+];
+const DECISIONS = [
+  {"id": "D-01", "gap": "G1", "title": "Item models include a constant (drift in log levels)", "why": "Mean item inflation ≠ 0; paper omits it only \"to keep the exposition simple\" (p. 6)", "alt": "No constant; check effect on h ≥ 3 · research: decision_research/best_practice.md", "status": "confirmed", "rev": ""},
+  {"id": "D-02", "gap": "G2", "title": "SIC grid p ∈ {0,…,12}, q ∈ {0,1,2} for monthly items; p ∈ {0,…,4} quarterly lags for quarterly items", "why": "Covers a year of dynamics, keeps search cheap", "alt": "q ∈ {0,…,4}; report how often bounds bind · research: decision_research/best_practice.md", "status": "confirmed", "rev": ""},
+  {"id": "D-03", "gap": "G3", "title": "Recursive (expanding) window from item start; re-estimate and re-select order at every quarterly origin", "why": "\"lag order is selected every time the models are reestimated\" (p. 7)", "alt": "Rolling 10-year window · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-04", "gap": "G4", "title": "Origins = Feb/May/Aug/Nov 2004 … Nov 2011 (32 origins); errors for h where actuals exist", "why": "Matches \"2004–2011\" and 2-months-known rule", "alt": "Restrict all h to a common target window · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-05", "gap": "G5", "title": "AR(1) benchmark on monthly Δlog headline CPI, iterated forward, same information set", "why": "Paper: \"simple autoregressive forecast … same information set\" (p. 8)", "alt": "AR(1) on quarterly y-o-y inflation · research: decision_research/best_practice.md", "status": "confirmed", "rev": ""},
+  {"id": "D-06", "gap": "G12", "title": "Use KOF Consensus (mean of prices_cy, prices_ny) as the consensus benchmark, compared on annual-average CPI inflation of the current and next year: our quarterly model forecasts are averaged to calendar years (known quarters filled with actuals), and every model is evaluated on that annual target. The survey used at each origin is the latest one published before the origin date. Interpolating KOF to quarters is only a clearly labelled secondary variant.", "why": "KOF reports only annual averages, no quarterly path (scripts/explore/research_kof_consensus.py), so a fair comparison must use the target KOF forecasts", "alt": "Interpolated quarterly KOF path; the paper's Consensus Economics row cannot be replicated exactly · research: decision_research/best_practice.md", "status": "confirmed", "rev": "2026-11-24"},
+  {"id": "D-07", "gap": "—", "title": "No add-factors in pseudo-OOS (VAT, tobacco, electricity)", "why": "Paper ignores add-factors in pseudo-OOS (p. 12)", "alt": "VAT-adjusted variant as robustness · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-08", "gap": "—", "title": "The repo is standalone; raw downloads live in data/raw/ but are not tracked in git. Every file is re-downloadable from the links and steps in docs/data_sources.md / README (download scripts where possible)", "why": "Revised 2026-11-24 at the user's request: no licence questions, small repo", "alt": "Track raw files in git", "status": "confirmed", "rev": ""},
+  {"id": "D-09", "gap": "G7", "title": "Items with fewer than 36 monthly (12 quarterly) observations get an ad-hoc rule instead of an ARIMA", "why": "Paper uses ad-hoc rules for items with too few observations (p. 7) but gives no number; 3 years is the minimum for a lag-12 seasonal term", "alt": "24 or 48 months · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-10", "gap": "G6", "title": "Quarterly-collected items: ARIMA on monthly Δlog with AR/MA lags restricted to 3, 6, 9, 12 (other coefficients fixed at 0 via SARIMAX lag lists), estimated on all months", "why": "Paper: \"only lags that are multiples of 3\" (p. 6) — keeps the monthly frequency needed for aggregation", "alt": "Estimate on quarterly-sampled series and interpolate; compare h = 2–5 RMSFE · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-11", "gap": "G7", "title": "\"Implausible\" forecast = item's forecast y-o-y change outside the [1st, 99th] percentile of its own historical y-o-y changes, or non-convergence → fall back to average y-o-y growth", "why": "Paper uses judgment (visual check, p. 7); a mechanical rule is needed for pseudo-OOS", "alt": "Wider band (min/max); log how often the rule fires · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-12", "gap": "G8", "title": "Map items across revisions (2000, 2005, 2010, …) by BFS code + name; splits/merges linked at the overlap month (Dec); items that cannot be linked start at their first observation. Target = paper Table 9 list (182 items)", "why": "Paper takes 182 items from the 2010 basket (App. B)", "alt": "Use only items continuous since 2000; report coverage share · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-13", "gap": "G9", "title": "Aggregate with chained Laspeyres: within year y, CPI_t/CPI_{Dec,y-1} = Σ w_{i,y} I_{i,t}/I_{i,Dec,y-1}, weights of year y (known at origin), chained across Decembers; forecast years beyond the latest weights reuse the latest known weights", "why": "This is how BFS builds the CPI (AGENTS.md §7); paper aggregates with \"CPI weights\" (p. 5)", "alt": "Fixed 2010 weights throughout; compare to official CPI (Chart 4) · research: decision_research/best_practice.md", "status": "confirmed", "rev": ""},
+  {"id": "D-14", "gap": "G10", "title": "Oil ECM: monthly, log item price vs log(Brent USD × USDCHF) monthly averages; one cointegrating vector estimated by OLS (Engle–Granger), ECM lags 0–3 by SIC; crude assumed constant (random walk) over horizon; current-month nowcast uses the price on the 1st working day of the month", "why": "Paper p. 7/12: ECM with crude in CHF, info up to first day of last month", "alt": "WTI instead of Brent; daily vs monthly-average · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-15", "gap": "G11", "title": "Rent model: quarterly (Feb/May/Aug/Nov collection), Δlog rent ARIMA(p,0,0) by SIC + Δmortgage_{t-4} split into positive/negative parts; mortgage series = cantonal-bank average to 2008Q1, BWO reference/average rate from 2008Q2, linked at 2008Q2; rate held constant over horizon", "why": "Paper p. 7", "alt": "Symmetric effect; SNB mortgage rate series as alternative · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-16", "gap": "G12", "title": "SNB conditional forecasts: hand-transcribe from the SNB Quarterly Bulletins / monetary policy assessments (published tables) into data/meta/", "why": "Only public real-time source", "alt": "Skip the SNB benchmark if transcription incomplete · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-17", "gap": "G13", "title": "Kalman extension via statsmodels SARIMAX/MLEModel with missing (NaN) monthly observations for non-collected months, exact diffuse init, enforce_stationarity/invertibility=True; collected changes modelled as sum of unobserved monthly changes since last collection", "why": "App. C: ML via Kalman filter, causal/invertible", "alt": "Custom MLEModel vs. NaN-aggregation trick; validate on simulated data · research: decision_research/best_practice.md", "status": "proposed", "rev": ""},
+  {"id": "D-18", "gap": "—", "title": "CPI item data = BFS \"Detailresultate seit 1982\" file of each basket (LIK93B93 … LIK25B25); annual weights from the separate BFS GEWICHTUNGEN file (one sheet per basket, one column per year 1993, 2000/01, 2002–2026). Within a file, a repeated position number (BFS special groupings below the main hierarchy) is dropped; only the first (basket) occurrence is kept", "why": "The 2015/2020 basket files carry only their latest weight year; GEWICHTUNGEN has every year. Special groupings can be rebuilt from items", "alt": "Read special groupings too (e.g. official core) as a check series", "status": "proposed", "rev": ""},
+  {"id": "D-19", "gap": "G11", "title": "Mortgage rate for the rent model = SNB zikrepro mean variable mortgage rate (M_MV), one continuous monthly series 1976–today; refines D-15 (no splice of cantonal-bank and BWO series)", "why": "Paper fn. 3 links the cantonal-bank rate with the BWO rate in 2008Q2; the SNB series is continuous over the whole sample, machine-readable, and the BWO table is not downloadable", "alt": "BWO reference rate (legal rent anchor since 2008, step function, manual copy) as robustness", "status": "confirmed", "rev": ""},
+  {"id": "D-20", "gap": "G12", "title": "SNB conditional forecast benchmark from SNB cube snbiprogq (all assessments since June 2004) instead of hand transcription (refines D-16); forecast for origin quarter t = assessment published in the last month of quarter t", "why": "Same published numbers, machine-readable, no transcription errors", "alt": "Hand transcription from press releases", "status": "confirmed", "rev": ""},
+  {"id": "D-21", "gap": "G8", "title": "Table 9 gives no item -> ARIMA(6) mapping; agg14 is derived from the item order in Table 9 (oil products and rents split out), agg6 (origin x product type) is left empty and assigned in T1.4 from the BFS special groupings (domestic/imported, goods/services) of the 2010 basket, checked against the Table 9 ARIMA(6) weights", "why": "Paper lists ARIMA(6) totals only; BFS publishes the origin/type classification per position", "alt": "Hand assignment by item name. T1.4 finding: the BFS item files list the domestic/imported and goods/services aggregates only as index series, not which positions belong to them (scripts/explore/special_groupings.py), so agg6 is still empty after T1.4 — open, needs a new source or another method", "status": "proposed (open)", "rev": ""},
+  {"id": "D-22", "gap": "G8", "title": "Paper item -> BFS position: Table 9's 2010 weights equal the BFS LIK2005 basket weights of 2010, so each of the 182 items is the 2005-basket position with that weight; duplicate weights resolved by Table 9's position order (longest order-preserving match). 179 matched this way, 3 by name in data/meta/item_mapping_overrides.csv: Skirts (Table 9 weight 0.230 vs BFS 0.143), Shoe repairs (0.241 vs 0.022), and \"Hospital services\" 0.046 = Sanitätsmaterial (Table 9's health names are shifted one row against the weights; we follow the weights)", "why": "Weights are exact, names are translations; 2010 coverage 92.788 % = paper", "alt": "Match by name only", "status": "proposed", "rev": ""},
+  {"id": "D-23", "gap": "G8", "title": "Fixed list of the paper's 182 items over the whole sample. Other baskets: same position number with similar name (2000–2020 numbering is stable), else best name match; 52 hand overrides (reviewable CSV). An item split in another basket is rebuilt from its children with that basket's annual weights (chained Laspeyres within the basket, paper p. 11); two 2005 items merged later share the merged series (women's coats + jackets from 2016); items dropped from a basket end there (i169 after 2015; i085, i086 after 2020)", "why": "Keeps the model comparable to the paper over 2012–today (user choice 2026-11-24)", "alt": "Re-map to each new basket's own item list", "status": "confirmed", "rev": ""},
+  {"id": "D-24", "gap": "—", "title": "Chain-link each basket's own file over its own period at the overlap month (May 2000, Dec 2005, Dec 2010, Dec 2015, Dec 2020, Dec 2025); one reference base Dec 2010 = 100. BFS back-casts in newer files are used only to validate the mapping (792 item-links, median correlation of monthly changes 1.00, none flagged)", "why": "What was published in real time (user choice 2026-11-24)", "alt": "Use the latest file's back-series", "status": "confirmed", "rev": ""},
+  {"id": "D-25", "gap": "—", "title": "1993 basket (May 1993–May 2000) and 2025 basket (renumbered): link only clear 1:1 matches = similar name AND correlation >= 0.9 of monthly log changes over the 24 months before the link (1993: vs the 2015 file's back-cast; 2025: vs our linked series). Result: 134 items start May 1993, 48 May 2000; 128 items continue into 2026, 51 end Dec 2025 (no confirmed 2025 counterpart yet)", "why": "User choice 2026-11-24 (\"1:1 matches only\"); names repeat across groups (wine in shops vs restaurants)", "alt": "Hand-map the 2025 basket (follow-up)", "status": "confirmed", "rev": ""}
+];
+/* @generated-end */
+
+/* ---------- hand-written data ---------- */
 const PHASES = [
   {id:"P0", name:"Foundations"}, {id:"P1", name:"Data"}, {id:"P2", name:"Item models"},
   {id:"P3", name:"Replication"}, {id:"P4", name:"Paper extension"}, {id:"P5", name:"Thesis extension"}, {id:"P6", name:"Reporting"}
 ];
 const CRIT = new Set(["T0.0","T0.1","T1.1","T1.4","T1.5","T2.1","T2.2","T2.5","T3.1","T3.3","T6.1"]);
-const TASKS = [
+// Short card names and "done when" criteria per task; title, skill, deps and status come from BOARD.
+const TASK_META = [
   {id:"T0.0",ph:"P0",nm:"Standalone repo",title:"Make the repo standalone: git init, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader",skill:"snb-arima-next-task",deps:[],done:"Nothing in src, scripts or tests points outside Arima-model/; the SNB loader reads from data/raw"},
   {id:"T0.1",ph:"P0",nm:"Package skeleton",title:"Create package skeleton, config.py, run_all.py, pytest setup",skill:"snb-arima-next-task",deps:["T0.0"],done:"import arima_snb and pytest -q pass; all magic numbers live in config.py"},
   {id:"T0.2",ph:"P0",nm:"Resolve paper gaps",title:"Resolve gaps G1–G13 into initial decisions D-xx",skill:"snb-arima-next-task",deps:[],done:"Every gap has a D-xx row with reason and page; key ones confirmed by you"},
@@ -454,6 +524,13 @@ const TASKS = [
   {id:"T5.2",ph:"P5",nm:"Error decomposition",title:"(optional) Error decomposition: oil price and exchange-rate surprises (paper p. 9)",skill:"snb-arima-evaluation",deps:["T3.3"],done:"Error regressions on oil and FX surprises; compare with R² ≈ 60 % in the paper"},
   {id:"T6.1",ph:"P6",nm:"Thesis tables + text",title:"Paper-vs-replication comparison, LaTeX tables, figures, methods text",skill:"snb-arima-report",deps:["T3.3"],done:"LaTeX tables and figures generated from outputs, methods draft, deviations table"}
 ];
+const META_BY_ID = Object.fromEntries(TASK_META.map(t => [t.id, t]));
+const TASKS = BOARD.map(b => {
+  const m = META_BY_ID[b.id] || {};
+  return {...b, nm: m.nm || b.title, done: m.done || "see the skill's definition of done"};
+});
+const STATUS_LABEL = {todo:"to do", doing:"in progress", done:"done", blocked:"blocked"};
+const decState = d => d.status.startsWith("confirmed") ? "confirmed" : (d.status.includes("open") ? "open" : "proposed");
 
 const SKILLS = [
   {id:"snb-arima-next-task",tasks:"T0.0–T0.2 · every session",use:"Start of every session: picks the next unblocked task, runs its skill, updates the board and runs the micro retro.",out:"Updated task board, decisions log, retro entry",checks:["Never marks a task done without a passing check","Splits oversized tasks into sub-IDs"]},
@@ -509,17 +586,6 @@ const TABLES = [
     ["Extended ARIMA (182)",[0.06,0.32,0.64,0.86,1.00]],
     ["ARIMA (182)",[1.18,1.28,1.11,1.07,1.04],[0.278,0.067,0.157,0.184,0.438]],
     ["Real-time ARIMA",[0.57,1.12,1.02,0.97,0.95],[0.003,0.321,0.466,0.258,0.203]]]}
-];
-
-const DECISIONS = [
-  {id:"D-01",gap:"G1",title:"Item models include a constant (drift in log levels)",why:"Mean item inflation is not zero. The paper drops the constant only to keep the exposition simple (p. 6).",alt:"No constant; compare at h ≥ 3."},
-  {id:"D-02",gap:"G2",title:"SIC grid p ∈ {0…12}, q ∈ {0,1,2}; quarterly items p ∈ {0…4} quarterly lags",why:"Covers a year of dynamics and keeps the search cheap.",alt:"q up to 4; report how often the grid bounds bind."},
-  {id:"D-03",gap:"G3",title:"Expanding window from item start, re-estimated at every quarterly origin",why:"The paper says the lag order is selected every time the models are re-estimated (p. 7).",alt:"Rolling 10-year window."},
-  {id:"D-04",gap:"G4",title:"Origins Feb/May/Aug/Nov 2004 … Nov 2011 (32), errors where actuals exist",why:"Matches “2004–2011” and the two-months-known rule.",alt:"One common target window for all horizons."},
-  {id:"D-05",gap:"G5",title:"AR(1) benchmark on monthly Δlog headline CPI, iterated forward",why:"The paper only says “simple autoregressive forecast … same information set” (p. 8).",alt:"AR(1) on quarterly y-o-y inflation."},
-  {id:"D-06",gap:"G12",title:"KOF consensus replaces Consensus Economics",why:"Consensus Economics is paywalled. The KOF files are copied into data/raw in T0.0.",alt:"Report separately and flag as not identical."},
-  {id:"D-07",gap:"—",title:"No add-factors in pseudo-OOS (VAT, tobacco, electricity)",why:"The paper also ignores add-factors in its pseudo-OOS exercise (p. 12).",alt:"VAT-adjusted variant as a robustness check."},
-  {id:"D-08",gap:"—",title:"Raw data in data/raw is not stored in git; download steps in data_sources.md and README",why:"Your choice (24 Nov): keeps the public repo small and avoids licence questions about sharing data files.",alt:"Track raw files in git."}
 ];
 
 const OPENS = [
@@ -621,8 +687,6 @@ function paintProgress(){
   $("#st-rev-s").textContent = done + " of " + ITEMS.length + " items checked";
   const fixes = ITEMS.filter(i => reviews[i.rid] && reviews[i.rid].status === "fix").length;
   if (fixes) $("#st-rev-s").textContent += " · " + fixes + " need a fix";
-  const decOk = DECISIONS.filter(d => (reviews[d.rid] || {}).status === "ok").length;
-  $("#st-dec").textContent = decOk + " / " + DECISIONS.length;
   document.querySelectorAll("[data-progress]").forEach(el => {
     const sec = el.dataset.progress;
     const items = ITEMS.filter(i => i.section === sec);
@@ -663,9 +727,27 @@ function setBanner(kind, text){
   b.dataset.kind = kind; b.textContent = text; b.hidden = false;
 }
 
+/* ---------- render: progress from the planning files ---------- */
+function renderPlanStats(){
+  const fmtDate = iso => { try { return new Date(iso + "T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}); } catch(e){ return iso; } };
+  $("#asof").textContent = "AGENTS.md · task board as of " + fmtDate(UPDATED);
+  const n = s => TASKS.filter(t => t.status === s).length;
+  $("#st-tasks").textContent = n("done") + " / " + TASKS.length;
+  const parts = [PHASES.length + " phases"];
+  if (n("doing")) parts.push(n("doing") + " in progress");
+  if (n("blocked")) parts.push(n("blocked") + " blocked");
+  $("#st-tasks-s").textContent = parts.join(" · ");
+  const conf = DECISIONS.filter(d => decState(d) === "confirmed").length;
+  $("#st-dec").textContent = conf + " / " + DECISIONS.length;
+  $("#st-dec-s").textContent = (DECISIONS.length - conf) + " still proposed · where the paper is silent";
+}
+
 /* ---------- render: pipeline ---------- */
-let selected = "T0.1";
 const unlocks = id => TASKS.filter(t => t.deps.includes(id)).map(t => t.id);
+const isDone = id => (TASKS.find(t => t.id === id) || {}).status === "done";
+// Open on the task in progress, else the next one that can start (critical path first).
+const ready = TASKS.filter(t => t.status === "todo" && t.deps.every(isDone));
+let selected = ((TASKS.find(t => t.status === "doing") || ready.find(t => CRIT.has(t.id)) || ready[0] || TASKS[0]) || {}).id;
 
 function renderPhases(){
   const root = $("#phases");
@@ -673,10 +755,11 @@ function renderPhases(){
   for (const ph of PHASES){
     const col = h("div", {class:"col"});
     for (const t of TASKS.filter(x => x.ph === ph.id)){
-      col.append(h("button", {type:"button", class:"task", "data-id":t.id, "data-rid":t.rid, "aria-pressed":"false",
-        onclick: () => select(t.id)},
+      col.append(h("button", {type:"button", class:"task", "data-id":t.id, "data-rid":t.rid, "data-status":t.status, "aria-pressed":"false",
+        title: t.note || null, onclick: () => select(t.id)},
         h("div", {class:"id"}, CRIT.has(t.id) ? h("span", {class:"sq", "aria-label":"critical path"}) : null, t.id,
-          h("span", {class:"grow"}), h("span", {class:"rv-dot", "aria-hidden":"true"})),
+          h("span", {class:"grow"}), t.status !== "todo" ? h("span", {class:"tst"}, STATUS_LABEL[t.status]) : null,
+          h("span", {class:"rv-dot", "aria-hidden":"true"})),
         h("div", {class:"nm"}, t.nm)));
     }
     root.append(h("div", {class:"phase"}, h("h3", null, h("b", null, ph.id), " " + ph.name), col));
@@ -708,7 +791,9 @@ function select(id){
       h("p", {class:"eyebrow"}, t.id + " · " + ph.id + " " + ph.name + (CRIT.has(id) ? " · critical path" : "")),
       h("h3", null, t.title),
       h("dl", {class:"kv"},
-        h("dt", null, "Status"), h("dd", null, h("span", {class:"chip status-todo"}, "to do")),
+        h("dt", null, "Status"), h("dd", null, h("span", {class:"chip status-" + t.status}, STATUS_LABEL[t.status])),
+        t.note ? h("dt", null, "Note") : null,
+        t.note ? h("dd", {class:"note"}, t.note) : null,
         h("dt", null, "Skill"), h("dd", null, h("button", {type:"button", class:"chip skill", onclick: () => jumpSkill(t.skill)}, t.skill)),
         h("dt", null, "Needs"), h("dd", null, depChips),
         h("dt", null, "Unlocks"), h("dd", null, nextChips),
@@ -758,7 +843,8 @@ function renderDecisions(){
   const root = $("#decs");
   for (const d of DECISIONS){
     root.append(h("div", {class:"dec"},
-      h("div", {class:"hd"}, h("span", {class:"id"}, d.id), h("span", {class:"gap"}, "gap " + d.gap), h("span", {class:"st st-proposed"}, "proposed"), h("h3", null, d.title)),
+      h("div", {class:"hd"}, h("span", {class:"id"}, d.id), h("span", {class:"gap"}, d.gap && d.gap !== "—" ? "gap " + d.gap : "deviation"),
+        h("span", {class:"st st-" + decState(d)}, d.status), d.rev ? h("span", {class:"gap"}, "revised " + d.rev) : null, h("h3", null, d.title)),
       h("p", null, d.why),
       h("p", {class:"alt"}, "Alternative: " + d.alt),
       reviewControl(d.rid, {choices:DEC_CHOICES, compact:true})));
@@ -831,6 +917,7 @@ $("#fb-form").addEventListener("submit", async e => {
 });
 
 /* ---------- boot ---------- */
+renderPlanStats();
 renderPhases();
 select(selected);
 renderClaims();

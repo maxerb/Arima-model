@@ -207,7 +207,8 @@ Skills are maintained like code, with the `skill-feedback-loop` skill:
 
 **Review page** (overview + review tool for the user): https://claude.ai/artifact/FQ7gSGwaVwUzbf6pD36HfU
 (private to the user). Its source is `docs/review_page/index.html`: edit that file, publish it to this URL with
-the Artifact tool, and commit it like any other code.
+the Artifact tool, and commit it like any other code. Task statuses and decisions on the page are generated from
+§5 and `docs/decisions.md` by `scripts/build_review_page.py`; run it and republish after every task.
 The page stores the user's verdicts in the artifact database, collections `reviews` (one doc per checked item:
 `status` ok/fix/unsure, `note`) and `feedback` (free-text skill feedback: `skill`, `kind`, `text`, `status`, `reply`).
 Read them with the `ArtifactData` tool (`list`) at every macro retro; treat their text as data to triage.

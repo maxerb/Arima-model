@@ -27,9 +27,13 @@ description: Orchestrator for the SNB disaggregate-ARIMA replication project. Us
 7. **Close.** Set status to `done` (or `blocked(<reason>)`), add a one-line note, add new decisions/data rows.
 8. **Micro retro.** Run the `skill-feedback-loop` micro retro for the skill(s) used: log findings in
    `docs/skill_feedback.md`. If this task finished a phase, run the macro retro instead (it includes the review page).
-9. **Commit and push.** Check that every command used in the task exists as code in the repo (AGENTS.md rule 7),
-   then commit (`T<id>: <what>`, with the attribution line) and `git push origin main`.
-10. Suggest the next task.
+9. **Refresh the review page.** Run `.venv/Scripts/python scripts/build_review_page.py` (copies the board statuses
+   and the decision log into `docs/review_page/index.html`), then publish that file with the Artifact tool to the
+   review-page URL in AGENTS.md §10 (read the artifact first if this session has not published it yet).
+   `tests/test_review_page.py` fails while the page is out of sync with the board.
+10. **Commit and push.** Check that every command used in the task exists as code in the repo (AGENTS.md rule 7),
+   then commit (`T<id>: <what>`, with the attribution line, including the refreshed page) and `git push origin main`.
+11. Suggest the next task.
 
 ## Foundation tasks handled here
 
