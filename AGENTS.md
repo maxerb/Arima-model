@@ -130,7 +130,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T3.2 | Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional | `snb-arima-evaluation` | T3.1 | todo |
 | T3.3 | RMSFE, relative RMSFE, DMW-HLN → Tables 1–3 | `snb-arima-evaluation` | T3.2, T2.3, T2.4 | todo |
 | **P4** | **Extension from the paper** | | | |
-| T4.1 | Collection-frequency state-space model (App. C), sample from 1993 | `snb-arima-kalman-extension` | T2.1 | todo |
+| T4.1 | Collection-frequency state-space model (App. C), sample from 1993 | `snb-arima-kalman-extension` | T2.1 | done (2026-11-24; all 182 items, SARIMAX on levels with gaps, SIC orders per vintage 2003–2010, Chart 3 replica; D-41…D-44) |
 | T4.2 | Evaluate extended ARIMA(182) → Table 4 | `snb-arima-evaluation` | T4.1, T3.1 | todo |
 | **P5** | **Thesis extension** | | | |
 | T5.1 | Extend evaluation to 2012–latest; sub-periods; robustness to decisions D-xx | `snb-arima-evaluation` | T3.3 | todo |

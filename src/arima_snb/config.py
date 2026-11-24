@@ -75,6 +75,13 @@ NO_COLLECTION_TOL = 1e-3           # |log change| below this counts as "not coll
 CALENDAR_LAST_YEAR = 2012          # D-28: paper's "2011-" calendar (Table 8) applied up to the paper's writing
 
 # ---------------------------------------------------------------------------
+# Collection-frequency extension (T4.1, paper section 5 / App. C, decisions D-41 ... D-44)
+# ---------------------------------------------------------------------------
+KALMAN_P_MAX = 12                  # D-44: AR order p = 0..12 of the latent monthly changes, chosen by SIC per vintage
+KALMAN_VINTAGES = range(2003, 2011)  # D-44: order vintages needed for origins 2004-2011 (Table 4); extend for T5.1
+KALMAN_N_JOBS = 6                  # parallel worker processes for the order search
+
+# ---------------------------------------------------------------------------
 # Reproducibility
 # ---------------------------------------------------------------------------
 SEED = 20131
