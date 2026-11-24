@@ -109,7 +109,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | ID | Task | Skill | Depends on | Status |
 |---|---|---|---|---|
 | **P0** | **Foundations** | | | |
-| T0.0 | Make the repo standalone: `git init`, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader | `snb-arima-next-task` | – | doing (repo created 2026-11-24; copying files open) |
+| T0.0 | Make the repo standalone: `git init`, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader | `snb-arima-next-task` | – | done (2026-11-24; KOF files kept out of git until licence checked) |
 | T0.1 | Create package skeleton, `config.py`, `run_all.py`, pytest setup | `snb-arima-next-task` | T0.0 | todo |
 | T0.2 | Resolve gaps G1–G13 into initial decisions D-xx | `snb-arima-next-task` | – | todo |
 | **P1** | **Data** | | | |

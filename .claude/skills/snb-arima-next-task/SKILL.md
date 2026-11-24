@@ -42,7 +42,11 @@ The project must not depend on anything outside `Arima-model/`. Ask the user bef
 - **Copy** (never move or delete) from the thesis repo `../Bachelors-Thesis/`: raw files `Data/raw/*` → `data/raw/`;
   `codebook.csv` (header and rows) → `codebook.csv`; `requirements.txt` → `requirements.txt` re-saved as **UTF-8** (it was
   UTF-16); `read_snb_cube` from `src/snb.py` → `src/arima_snb/io.py` with paths changed to `data/raw`.
-- Create a local virtual environment `.venv/` and `pip install -r requirements.txt`.
+- Create a local virtual environment `.venv/`, `pip install -r requirements.txt pytest`, `pip install -e .`, then
+  re-pin with `pip freeze --exclude-editable > requirements.txt` (F-001).
+- Check each raw file's licence before tracking it in git; gitignore files with unclear terms and say so in
+  `docs/data_sources.md` (D-08, F-002).
+- `io.py` needs the path constants, so T0.0 creates the paths section of `config.py`; T0.1 adds the rest (F-003).
 - Check: `grep -rn "\.\./" src scripts tests` finds nothing; the SNB loader reads a file from `data/raw/`.
 
 ### T0.1 Package skeleton

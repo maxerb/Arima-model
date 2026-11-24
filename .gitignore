@@ -29,3 +29,6 @@ outputs/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Raw files whose licence is not yet checked (docs/data_sources.md)
+data/raw/kof_*
