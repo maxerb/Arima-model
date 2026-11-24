@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+*.egg-info/
+.pytest_cache/
+
+# Derived data and outputs (rebuilt by scripts/run_all.py)
+data/interim/
+data/final/
+outputs/
+
+# data/raw/ is tracked when licence and size allow (D-08); list exceptions here
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Local Claude settings and editor / OS files
+.claude/settings.local.json
+Thumbs.db
+desktop.ini
+.DS_Store
