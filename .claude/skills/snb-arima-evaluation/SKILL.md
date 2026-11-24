@@ -23,7 +23,7 @@ def run_pseudo_oos(model_fn, origins: list[pd.Timestamp], horizons=range(1, 6)) 
 | ARIMA(182) / real-time ARIMA | full model (item models + oil ECM + rent model for "real-time-like"; plain ARIMA for oil/rent in Table 2) |
 | ARIMA(14), ARIMA(6), ARIMA(1) | see `snb-arima-aggregate` |
 | AR(1) | D-05 |
-| Consensus | KOF consensus (D-06): map survey date to our origin (latest survey published **before** the origin's information date); convert annual forecasts to quarterly targets only if defensible — else compare only matching horizons and say so |
+| Consensus | KOF consensus (D-06 rev., confirmed): mean of `prices_cy` / `prices_ny` from the latest survey published **before** the origin date. Evaluate on **annual-average CPI inflation of the current and next year** — average our quarterly forecasts to calendar years (realised quarters = actuals) and score every model on that same target. Interpolating KOF to quarters is only a labelled secondary variant; say in the tables that the paper's Consensus Economics row is not replicated exactly |
 | SNB conditional | hand-collected from MPA press releases; quarter of publication ↔ origin of that quarter |
 The paper's "real-time ARIMA" vintages are not public — our closest analogue is ARIMA(182) with special models; state this clearly.
 
