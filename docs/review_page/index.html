@@ -1,0 +1,884 @@
+<title>SNB ARIMA Replication</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: Swiss-grid review console — sticky section nav, flush-left content column, red square as the only ornament. */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --surface-2:#E9EDF1; --fg:#141C24; --muted:#5A6674; --line:#D4DBE2;
+  --accent:#D52B1E; --accent-soft:#FBE5E3; --ink:#1F4E79; --ink-soft:#E2EBF4;
+  --ok:#21734A; --ok-soft:#DFF1E7; --warn:#9A5B00; --warn-soft:#FBEED7; --bad:#B42318; --bad-soft:#FCE6E4;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E141A; --surface:#161F28; --surface-2:#1D2833; --fg:#E5EBF0; --muted:#9AA7B3; --line:#2A3743;
+  --accent:#FF6A5C; --accent-soft:#3B1F1D; --ink:#8DB9E4; --ink-soft:#1A2D40;
+  --ok:#5BCB8A; --ok-soft:#163326; --warn:#F0B25A; --warn-soft:#382A13; --bad:#FF7E73; --bad-soft:#3C1D1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E141A; --surface:#161F28; --surface-2:#1D2833; --fg:#E5EBF0; --muted:#9AA7B3; --line:#2A3743;
+  --accent:#FF6A5C; --accent-soft:#3B1F1D; --ink:#8DB9E4; --ink-soft:#1A2D40;
+  --ok:#5BCB8A; --ok-soft:#163326; --warn:#F0B25A; --warn-soft:#382A13; --bad:#FF7E73; --bad-soft:#3C1D1B; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:10px}
+.brand{font:800 15px/1 var(--f-display);letter-spacing:-.01em;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.sq{display:inline-block;width:10px;height:10px;background:var(--accent);flex:none}
+nav.sections{display:flex;gap:2px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+nav.sections::-webkit-scrollbar{display:none}
+nav.sections a{color:var(--muted);text-decoration:none;font-size:13px;padding:6px 9px;border-radius:4px;white-space:nowrap}
+nav.sections a:hover{background:var(--surface-2);color:var(--fg)}
+.progress-pill{font:500 12px/1 var(--f-mono);white-space:nowrap;padding:7px 10px;border-radius:999px;background:var(--surface-2);color:var(--fg)}
+.progress-pill b{color:var(--accent);font-weight:500}
+
+/* sections */
+section{padding-block:44px;border-top:1px solid var(--line);scroll-margin-top:60px}
+section:first-of-type{border-top:0}
+.eyebrow{font:500 12px/1.3 var(--f-mono);color:var(--muted);letter-spacing:.02em;margin:0 0 10px}
+h1{font:800 clamp(28px,4.6vw,46px)/1.06 var(--f-display);letter-spacing:-.022em;text-wrap:balance;max-width:24ch;margin:0 0 14px}
+h2{font:700 26px/1.15 var(--f-display);letter-spacing:-.012em;text-wrap:balance;margin:0 0 8px}
+h3{font:700 16px/1.3 var(--f-display);margin:0}
+.lede{max-width:68ch;color:var(--muted);margin:0 0 22px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sec-head .lede{margin:0}
+.sec-count{font:500 12px/1 var(--f-mono);color:var(--muted);white-space:nowrap}
+
+/* hero */
+.cite{font-size:14px;color:var(--muted);max-width:70ch;margin:0 0 24px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.stat .k{font:500 12px/1.2 var(--f-mono);color:var(--muted)}
+.stat .v{font:800 30px/1.1 var(--f-display);letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+.stat .s{font-size:13px;color:var(--muted);margin-top:2px}
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;counter-reset:how;margin:0;padding:0;list-style:none}
+.howto li{counter-increment:how;background:var(--surface-2);border-radius:var(--r);padding:12px 14px;font-size:14px}
+.howto li::before{content:counter(how);font:700 13px/1 var(--f-mono);color:var(--accent);display:block;margin-bottom:6px}
+.banner{margin-top:14px;font-size:13px;padding:10px 12px;border-radius:var(--r);background:var(--warn-soft);color:var(--fg)}
+.banner[data-kind="ok"]{background:var(--ok-soft)}
+.banner[data-kind="bad"]{background:var(--bad-soft)}
+
+/* model flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;margin:6px 0 22px}
+.step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.step:not(:last-child)::after{content:"→";position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:var(--muted);font:500 16px var(--f-mono)}
+.step .t{font:500 11px/1 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.step h3{margin:6px 0 6px}
+.step p{margin:0;font-size:13.5px;color:var(--muted)}
+.step ul{margin:6px 0 0;padding-left:16px;font-size:13px;color:var(--muted)}
+.eqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+.eq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.eq .lab{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.eq code{display:block;font:14px/1.5 var(--f-mono);margin-top:6px;overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+
+/* pipeline */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-box{width:12px;height:12px;border:1.5px solid var(--line);border-radius:3px;background:var(--surface)}
+.lg-dep{border-color:var(--ink);border-style:dashed}
+.lg-next{border-color:var(--ok)}
+.phases-scroll{overflow-x:auto;padding-bottom:6px}
+.phases{display:grid;grid-template-columns:repeat(7,minmax(148px,1fr));gap:10px;min-width:1060px}
+.phase h3{font:600 12px/1.3 var(--f-mono);color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.phase h3 b{color:var(--fg);font-weight:600}
+.phase .col{display:flex;flex-direction:column;gap:8px}
+.task{all:unset;box-sizing:border-box;display:block;cursor:pointer;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:8px 10px;transition:opacity .15s,border-color .15s}
+.task:hover{border-color:var(--muted)}
+.task:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.task .id{font:500 11.5px/1 var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:6px}
+.task .id .sq{width:7px;height:7px}
+.task .nm{font-size:13.5px;font-weight:500;margin-top:5px;line-height:1.3}
+.task .rv-dot{float:right;width:8px;height:8px;border-radius:50%;background:transparent;margin-top:1px}
+.task .rv-dot[data-s="ok"]{background:var(--ok)}
+.task .rv-dot[data-s="fix"]{background:var(--bad)}
+.task .rv-dot[data-s="unsure"]{background:var(--warn)}
+.phases.has-sel .task{opacity:.42}
+.phases.has-sel .task.is-sel,.phases.has-sel .task.is-dep,.phases.has-sel .task.is-next{opacity:1}
+.task.is-sel{border-color:var(--ink);box-shadow:0 0 0 3px var(--ink-soft)}
+.task.is-dep{border-color:var(--ink);border-style:dashed}
+.task.is-next{border-color:var(--ok)}
+.detail{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px}
+.detail h3{font-size:19px;margin:4px 0 10px}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;font-size:14px;margin:0}
+.kv dt{color:var(--muted);font-size:13px}
+.kv dd{margin:0;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:5px;font:500 12px/1 var(--f-mono);padding:5px 8px;border-radius:999px;background:var(--surface-2);color:var(--fg);border:0;cursor:default;margin:0 4px 4px 0}
+button.chip{cursor:pointer}
+button.chip:hover{background:var(--ink-soft)}
+.chip.status-todo{background:var(--surface-2)}
+.chip.skill{background:var(--ink-soft);color:var(--ink)}
+
+/* review control */
+.rv{display:flex;flex-direction:column;gap:8px;min-width:0}
+.rv-btns{display:flex;flex-wrap:wrap;gap:4px}
+.rv-btn{font:500 12.5px/1 var(--f-body);padding:7px 10px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.rv-btn:hover:not(:disabled){border-color:var(--muted)}
+.rv-btn:disabled{cursor:not-allowed;opacity:.55}
+.rv-btn[aria-pressed="true"][data-val="ok"]{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.rv-btn[aria-pressed="true"][data-val="fix"]{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.rv-btn[aria-pressed="true"][data-val="unsure"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.rv textarea{font:13px/1.45 var(--f-body);width:100%;min-height:38px;resize:vertical;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg)}
+.rv-foot{display:flex;align-items:center;gap:8px;min-height:24px}
+.rv-save{font:500 12px/1 var(--f-body);padding:6px 10px;border-radius:4px;border:0;background:var(--ink);color:var(--surface);cursor:pointer}
+.rv-meta{font:11.5px/1.2 var(--f-mono);color:var(--muted)}
+.rv.compact textarea{min-height:34px}
+
+/* claims */
+.claims{display:flex;flex-direction:column;gap:8px}
+.claim{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(0,330px);gap:16px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.claim .pg{font:500 12px/1.3 var(--f-mono);color:var(--accent)}
+.claim p{margin:0;font-size:14px}
+.claim .topic{font:600 13px/1.3 var(--f-body);margin-bottom:3px}
+
+/* tables */
+.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:14px;margin-top:22px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.tcard .lab{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.tscroll{overflow-x:auto}
+table.rm{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.rm th,table.rm td{padding:6px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+table.rm th:first-child,table.rm td:first-child{text-align:left;white-space:normal;min-width:150px}
+table.rm thead th{font:500 11.5px var(--f-mono);color:var(--muted);border-bottom:1.5px solid var(--fg)}
+table.rm tr.abs td{background:var(--surface-2);font-weight:600}
+table.rm td .p{display:block;font-size:11px;color:var(--muted)}
+table.rm td.sig{font-weight:700;color:var(--accent)}
+table.rm td.sig .p{color:var(--accent)}
+.tnote{font-size:12px;color:var(--muted);margin:0}
+
+/* decisions */
+.decs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:12px}
+.dec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dec .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.dec .id{font:600 13px var(--f-mono);color:var(--accent)}
+.dec .gap{font:500 12px var(--f-mono);color:var(--muted)}
+.dec h3{font-size:15.5px;width:100%}
+.dec p{margin:0;font-size:13.5px}
+.dec .alt{color:var(--muted)}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
+.skill{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0;scroll-margin-top:70px}
+.skill .nm{font:600 13.5px/1.3 var(--f-mono);word-break:break-word}
+.skill p{margin:0;font-size:13.5px}
+.skill .lab{font:500 11px/1 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.skill ul{margin:0;padding-left:16px;font-size:13px;color:var(--muted)}
+.skill .fb-link{align-self:flex-start;font:500 12.5px var(--f-body);background:none;border:0;color:var(--ink);padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.skill.is-new{border-color:var(--ink)}
+
+/* loop */
+.loop{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;margin:0 0 10px;padding:0;list-style:none;counter-reset:lp}
+.loop li{counter-increment:lp;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.loop li:not(:last-child)::after{content:"→";position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:var(--muted);font:500 16px var(--f-mono)}
+.loop li::before{content:counter(lp);font:700 12px/1 var(--f-mono);color:var(--accent)}
+.loop h3{margin:6px 0 4px}
+.loop p{margin:0;font-size:13px;color:var(--muted)}
+.loop-back{font:12.5px var(--f-mono);color:var(--muted);text-align:center;border:1px dashed var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);padding:6px;margin:0 8% 22px}
+.cadence{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;margin-bottom:26px}
+.cad{background:var(--surface-2);border-radius:var(--r);padding:14px 16px}
+.cad p{margin:6px 0 0;font-size:13.5px}
+.fb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;align-items:start}
+form.fb{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+form.fb label{font:500 12.5px var(--f-body);color:var(--muted);display:flex;flex-direction:column;gap:5px}
+form.fb select,form.fb textarea{font:14px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg)}
+form.fb textarea{min-height:96px;resize:vertical}
+.btn{font:600 13.5px var(--f-body);padding:9px 14px;border-radius:4px;border:0;background:var(--accent);color:var(--surface);cursor:pointer;align-self:flex-start}
+.grow{flex:1}
+.inbox-head{margin-bottom:10px}
+.sm{font-size:12px}
+.mt3{margin-top:3px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.fb-msg{font-size:12.5px;color:var(--muted);min-height:1em}
+.inbox{display:flex;flex-direction:column;gap:8px}
+.inbox .empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:18px;font-size:13.5px;color:var(--muted)}
+.fbrow{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fbrow .hd{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fbrow .txt{font-size:14px;white-space:pre-wrap;word-break:break-word}
+.fbrow .reply{font-size:13px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px;white-space:pre-wrap}
+.st{font:500 11.5px/1 var(--f-mono);padding:4px 7px;border-radius:999px}
+.st-open{background:var(--warn-soft);color:var(--warn)}
+.st-applied{background:var(--ok-soft);color:var(--ok)}
+.st-rejected{background:var(--bad-soft);color:var(--bad)}
+.st-deferred,.st-proposed{background:var(--surface-2);color:var(--muted)}
+
+/* open items */
+.opens{display:flex;flex-direction:column;gap:8px}
+.open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,330px);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;align-items:start}
+.open p{margin:0;font-size:14px}
+.open .where{font:12px var(--f-mono);color:var(--muted);margin-top:3px}
+
+footer{border-top:1px solid var(--line);padding-block:26px 40px;font-size:13px;color:var(--muted)}
+footer ul{margin:8px 0 0;padding-left:18px;columns:2;column-gap:28px}
+footer code{font-family:var(--f-mono);font-size:12.5px}
+
+@media (max-width:900px){
+  .flow,.loop{grid-template-columns:1fr;gap:14px}
+  .step:not(:last-child)::after,.loop li:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}
+  .loop-back{margin:0 0 22px}
+  .detail,.fb-grid{grid-template-columns:1fr}
+  .claim{grid-template-columns:56px minmax(0,1fr)}
+  .claim .rv{grid-column:1 / -1}
+  .open{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .phases{grid-template-columns:1fr;min-width:0}
+  .progress-pill{display:none}
+  footer ul{columns:1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="sq" aria-hidden="true"></span>SNB ARIMA Replication</div>
+    <nav class="sections" aria-label="Sections">
+      <a href="#overview">Overview</a>
+      <a href="#model">Model</a>
+      <a href="#pipeline">Tasks</a>
+      <a href="#paper">Paper check</a>
+      <a href="#decisions">Decisions</a>
+      <a href="#skills">Skills</a>
+      <a href="#loop">Feedback loop</a>
+      <a href="#open">Open items</a>
+    </nav>
+    <div class="progress-pill" id="pill">Reviewed <b id="pill-n">0</b> / <span id="pill-t">0</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="overview">
+    <p class="eyebrow">AGENTS.md · planning snapshot, 24 Nov 2026</p>
+    <h1>Replicating the SNB's disaggregate ARIMA inflation model</h1>
+    <p class="cite">Huwiler, M. and D. Kaufmann (2013). <em>Combining disaggregate forecasts for inflation: The SNB's ARIMA model.</em> SNB Economic Studies 7/2013.
+      <a href="https://www.snb.ch/public/asset/de/www-snb-ch/publications/research/economic-studies/2013/03/economic_studies_2013_07/publications0/economic_studies_2013_07.n.pdf" target="_blank" rel="noopener">Open the PDF</a> to check page references.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Tasks</div><div class="v" id="st-tasks">22</div><div class="s">7 phases · 0 done</div></div>
+      <div class="stat"><div class="k">Skills</div><div class="v">11</div><div class="s">10 task skills + feedback loop</div></div>
+      <div class="stat"><div class="k">Decisions confirmed</div><div class="v" id="st-dec">0 / 8</div><div class="s">where the paper is silent</div></div>
+      <div class="stat"><div class="k">Your review</div><div class="v" id="st-rev">0%</div><div class="s" id="st-rev-s">0 of 0 items checked</div></div>
+    </div>
+    <ol class="howto">
+      <li>Read each section. Every claim about the paper has its page number, so you can check it against the PDF.</li>
+      <li>Mark each item <strong>Looks right</strong>, <strong>Needs fix</strong> or <strong>Unsure</strong>, and add a note where something is off.</li>
+      <li>Tell Claude <em>"process my review feedback"</em>. It reads your marks and notes from this page and updates the files and skills.</li>
+    </ol>
+    <div class="banner" id="db-banner" role="status">Connecting to review storage…</div>
+  </section>
+
+  <section id="model">
+    <p class="eyebrow">docs/paper_spec.md §1–4 · pp. 3–12</p>
+    <h2>How the model works</h2>
+    <p class="lede">The SNB does not forecast the CPI directly. It forecasts each expenditure item separately and adds the forecasts up with the CPI weights. The replication follows the same chain.</p>
+    <div class="flow">
+      <div class="step"><div class="t">Data</div><h3>CPI item panel</h3><p>Federal Statistical Office item indices, chain-linked across bases. 217 items in 2013, ~182 kept consistently.</p></div>
+      <div class="step"><div class="t">Item models</div><h3>One model per item</h3><ul><li>ARIMA(p,1,q), order by SIC</li><li>seasonal AR at lag 12</li><li>quarterly lags for quarterly items</li><li>ad-hoc rules as fallback</li><li>oil: ECM · rents: mortgage rate</li></ul></div>
+      <div class="step"><div class="t">Aggregate</div><h3>Chained Laspeyres</h3><p>Item forecasts weighted with that year's CPI weights, chained via December of the previous year.</p></div>
+      <div class="step"><div class="t">Target</div><h3>Quarterly y-o-y</h3><p>Inflation of the quarterly average index, horizons h = 1–5 quarters. h = 1 is the current quarter, with 2 months known.</p></div>
+      <div class="step"><div class="t">Evaluate</div><h3>2004–2011</h3><p>RMSFE, relative RMSFE and DMW tests against AR(1), ARIMA(1)/(6)/(14), consensus and the SNB forecast.</p></div>
+    </div>
+    <div class="eqs">
+      <div class="eq"><div class="lab"><span>Item ARIMA, eq. (1)</span><span class="mono">p. 6</span></div><code>Δpₜ = φ₁Δpₜ₋₁ + … + φₚΔpₜ₋ₚ + εₜ + θ₁εₜ₋₁ + … + θ_qεₜ₋q</code></div>
+      <div class="eq"><div class="lab"><span>Lag selection, eq. (3)</span><span class="mono">p. 7</span></div><code>SIC = log(SSE / T) + k · log(T) / T</code></div>
+      <div class="eq"><div class="lab"><span>Aggregation within year y (our reading of gap G9)</span><span class="mono">AGENTS §7</span></div><code>CPIₜ / CPI_Dec,y−1 = Σᵢ wᵢ,y · Iᵢ,ₜ / Iᵢ,Dec,y−1</code></div>
+      <div class="eq"><div class="lab"><span>Forecast accuracy</span><span class="mono">p. 10</span></div><code>RMSFE_f = √( (1/T) Σ (π_t+f − π_t+f|t)² )</code></div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">AGENTS.md §5 · task board</p>
+        <h2>Tasks and dependencies</h2>
+        <p class="lede">Select a task to see what it needs, what it unlocks, which skill runs it and when it counts as done.</p>
+      </div>
+      <span class="sec-count" data-progress="task"></span>
+    </div>
+    <div class="legend">
+      <span><span class="sq" aria-hidden="true"></span>critical path</span>
+      <span><span class="lg-box lg-dep"></span>needed first</span>
+      <span><span class="lg-box lg-next"></span>unlocked by it</span>
+    </div>
+    <div class="phases-scroll"><div class="phases" id="phases"></div></div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </section>
+
+  <section id="paper">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">docs/paper_spec.md · check against the PDF</p>
+        <h2>What I took from the paper</h2>
+        <p class="lede">The model specification all later work relies on. If one of these is wrong, every skill that uses it is wrong too, so these are the most important items to check.</p>
+      </div>
+      <span class="sec-count" data-progress="claim"></span>
+    </div>
+    <div class="claims" id="claims"></div>
+    <div class="tables" id="tables"></div>
+  </section>
+
+  <section id="decisions">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">docs/decisions.md</p>
+        <h2>Decisions where the paper is silent</h2>
+        <p class="lede">Defaults I proposed for gaps G1–G13. <strong>Confirm</strong> keeps the default. <strong>Change</strong> plus a note tells Claude what to use instead.</p>
+      </div>
+      <span class="sec-count" data-progress="decision"></span>
+    </div>
+    <div class="decs" id="decs"></div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Arima-model/.claude/skills/</p>
+        <h2>Skills</h2>
+        <p class="lede">One skill per task family, plus the feedback loop that keeps them accurate. Each card shows what the skill is for, what it produces and how it checks itself.</p>
+      </div>
+      <span class="sec-count" data-progress="skill"></span>
+    </div>
+    <div class="skills" id="skills-grid"></div>
+  </section>
+
+  <section id="loop">
+    <p class="eyebrow">.claude/skills/skill-feedback-loop · docs/skill_feedback.md</p>
+    <h2>Feedback loop for the skills</h2>
+    <p class="lede">Skills are instructions that later sessions follow without question, so a wrong line repeats in every later task. The loop turns what actually happened into small, tested edits.</p>
+    <ol class="loop">
+      <li><h3>Capture</h3><p>Your corrections, steps the agent had to improvise, wrong instructions, failed checks, and your notes on this page.</p></li>
+      <li><h3>Triage</h3><p>Wrong, missing, unclear, trigger, bloat, project fact or one-off. Facts go to the project docs, not into skills.</p></li>
+      <li><h3>Patch</h3><p>The smallest edit that fixes it, with the evidence attached. Applied only after your yes.</p></li>
+      <li><h3>Verify</h3><p>A regression scenario in the skill's <span class="mono">evals.md</span>. A fresh subagent plans from the edited skill, and its plan is graded.</p></li>
+      <li><h3>Record</h3><p>Log row updated, your feedback marked applied or rejected with a reply, this page republished.</p></li>
+    </ol>
+    <div class="loop-back">↺ the next task runs on the improved skill</div>
+    <div class="cadence">
+      <div class="cad"><h3>Micro retro · after every task</h3><p>Did you correct me? Did I improvise a step or skip one? Was an instruction wrong? Did a check fail? Each finding is logged. Only obvious fixes are applied straight away.</p></div>
+      <div class="cad"><h3>Macro retro · after every phase</h3><p>Processes the open findings and this inbox, checks the skills against each other and against AGENTS.md, removes lines that are never used, and tracks corrections per task. That number should keep falling.</p></div>
+    </div>
+    <div class="fb-grid">
+      <form class="fb" id="fb-form" novalidate>
+        <h3>Send feedback on a skill</h3>
+        <label for="fb-skill">Skill
+          <select id="fb-skill"></select>
+        </label>
+        <label for="fb-kind">Kind
+          <select id="fb-kind">
+            <option value="wrong">Instruction is wrong</option>
+            <option value="missing">Step or check is missing</option>
+            <option value="ambiguous">Unclear, could be read two ways</option>
+            <option value="idea">Idea or wish</option>
+          </select>
+        </label>
+        <label for="fb-text">What should change
+          <textarea id="fb-text" placeholder="e.g. The data skill should also download the BFS core inflation series (Kerninflation 1)."></textarea>
+        </label>
+        <button class="btn" type="submit" id="fb-send">Send to inbox</button>
+        <div class="fb-msg" id="fb-msg" role="status"></div>
+      </form>
+      <div>
+        <div class="sec-head inbox-head"><h3>Inbox</h3><span class="sec-count" id="fb-count"></span></div>
+        <div class="inbox" id="inbox"><div class="empty">No feedback yet. What you send appears here, and Claude adds a reply and a status (applied, rejected or deferred) at the next retro.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="open">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">to verify while working</p>
+        <h2>Open items and known limits</h2>
+        <p class="lede">Things I could not settle while planning. Each one is tied to the task where it will be resolved.</p>
+      </div>
+      <span class="sec-count" data-progress="open"></span>
+    </div>
+    <div class="opens" id="opens"></div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Files behind this page, in the standalone repository <code>Arima-model/</code>:
+  <ul>
+    <li><code>AGENTS.md</code> — agent instructions, task board</li>
+    <li><code>CLAUDE.md</code> — imports AGENTS.md</li>
+    <li><code>docs/paper_spec.md</code> — paper summary, target tables</li>
+    <li><code>docs/decisions.md</code> — decision log D-01…D-08</li>
+    <li><code>docs/skill_feedback.md</code> — feedback log</li>
+    <li><code>.claude/skills/*/SKILL.md</code> — 11 skills</li>
+  </ul>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- data (snapshot of the planning files) ---------- */
+const PHASES = [
+  {id:"P0", name:"Foundations"}, {id:"P1", name:"Data"}, {id:"P2", name:"Item models"},
+  {id:"P3", name:"Replication"}, {id:"P4", name:"Paper extension"}, {id:"P5", name:"Thesis extension"}, {id:"P6", name:"Reporting"}
+];
+const CRIT = new Set(["T0.0","T0.1","T1.1","T1.4","T1.5","T2.1","T2.2","T2.5","T3.1","T3.3","T6.1"]);
+const TASKS = [
+  {id:"T0.0",ph:"P0",nm:"Standalone repo",title:"Make the repo standalone: git init, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader",skill:"snb-arima-next-task",deps:[],done:"Nothing in src, scripts or tests points outside Arima-model/; the SNB loader reads from data/raw"},
+  {id:"T0.1",ph:"P0",nm:"Package skeleton",title:"Create package skeleton, config.py, run_all.py, pytest setup",skill:"snb-arima-next-task",deps:["T0.0"],done:"import arima_snb and pytest -q pass; all magic numbers live in config.py"},
+  {id:"T0.2",ph:"P0",nm:"Resolve paper gaps",title:"Resolve gaps G1–G13 into initial decisions D-xx",skill:"snb-arima-next-task",deps:[],done:"Every gap has a D-xx row with reason and page; key ones confirmed by you"},
+  {id:"T1.1",ph:"P1",nm:"CPI items + weights",title:"Download item-level CPI indices from the Federal Statistical Office (all bases since 1993) + weights per year",skill:"snb-arima-data",deps:["T0.1"],done:"Raw files in data/raw, codebook rows, loaders return long format without duplicates"},
+  {id:"T1.2",ph:"P1",nm:"Oil, FX, mortgage, forecasts",title:"Download headline CPI, crude oil, USDCHF, mortgage rates, consensus and SNB conditional forecasts",skill:"snb-arima-data",deps:["T0.1"],done:"All exogenous series and forecast sources downloaded and documented in data_sources.md"},
+  {id:"T1.3",ph:"P1",nm:"Transcribe Tables 5–9",title:"Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars)",skill:"snb-arima-data",deps:[],done:"Table 9 sums to 92.788; ARIMA(6) and ARIMA(14) weights sum to 100.000"},
+  {id:"T1.4",ph:"P1",nm:"Consistent item panel",title:"Build consistent item panel: chain-link bases, map items across revisions → ~182 items",skill:"snb-arima-cpi-panel",deps:["T1.1","T1.3"],done:"~182 items on one base; mapping CSV reviewable; no unexplained jumps at link months"},
+  {id:"T1.5",ph:"P1",nm:"Weights + collection calendar",title:"Weights by year + collection calendar (official + inferred)",skill:"snb-arima-cpi-panel",deps:["T1.4"],done:"weights.csv and collection.csv; trousers show quarterly → 6×/year → monthly"},
+  {id:"T1.6",ph:"P1",nm:"Validate vs official CPI",title:"Validate: re-aggregated CPI vs official (paper Chart 4)",skill:"snb-arima-aggregate",deps:["T1.5"],done:"Re-aggregated y-o-y tracks official CPI, mean gap about 0.1 pp or less"},
+  {id:"T2.1",ph:"P2",nm:"Item diagnostics",title:"Unit-root, seasonality and collection-frequency diagnostics → item_specs.csv",skill:"snb-arima-item-diagnostics",deps:["T1.5"],done:"item_specs.csv per spec vintage; most items arima with d = 1; no-look-ahead test"},
+  {id:"T2.2",ph:"P2",nm:"Item ARIMA + SIC",title:"Per-item ARIMA with SIC selection + ad-hoc fallbacks, single-origin forecast",skill:"snb-arima-item-models",deps:["T2.1"],done:"forecast_item passes the SIC simulation test and the no-look-ahead test; order log saved"},
+  {id:"T2.3",ph:"P2",nm:"Oil-products ECM",title:"Oil-products error-correction model",skill:"snb-arima-oil-rent",deps:["T1.2","T2.2"],done:"RMSFE path near 1.14 … 17.10 (Table 3); adjustment coefficient γ < 0"},
+  {id:"T2.4",ph:"P2",nm:"Rent model",title:"Rent model with asymmetric mortgage-rate effect",skill:"snb-arima-oil-rent",deps:["T1.2","T2.2"],done:"RMSFE near 0.00, 0.24, 0.46, 0.56, 0.61 (Table 3)"},
+  {id:"T2.5",ph:"P2",nm:"Aggregation",title:"Aggregation to CPI, ARIMA(6), ARIMA(14), core; quarterly y-o-y",skill:"snb-arima-aggregate",deps:["T2.2"],done:"aggregate_index, quarterly_yoy and sub-aggregate builders with unit tests"},
+  {id:"T3.1",ph:"P3",nm:"Pseudo-OOS engine",title:"Pseudo-out-of-sample engine (origins 2004–2011, 2 months known, h = 1–5)",skill:"snb-arima-evaluation",deps:["T2.5"],done:"32 origins × 5 horizons, cached; no-look-ahead test passes"},
+  {id:"T3.2",ph:"P3",nm:"Benchmarks",title:"Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional",skill:"snb-arima-evaluation",deps:["T3.1"],done:"All benchmark forecasts stored in the same long format"},
+  {id:"T3.3",ph:"P3",nm:"Tables 1–3",title:"RMSFE, relative RMSFE, DMW-HLN → Tables 1–3",skill:"snb-arima-evaluation",deps:["T3.2","T2.3","T2.4"],done:"table1–3.csv and compare_paper.csv; ranking and significance discussed"},
+  {id:"T4.1",ph:"P4",nm:"Collection-frequency Kalman",title:"Collection-frequency state-space model (App. C), sample from 1993",skill:"snb-arima-kalman-extension",deps:["T2.1"],done:"Simulation test recovers parameters; Chart 3 replica for trousers"},
+  {id:"T4.2",ph:"P4",nm:"Table 4",title:"Evaluate extended ARIMA(182) → Table 4",skill:"snb-arima-evaluation",deps:["T4.1","T3.1"],done:"table4.csv next to the paper's 0.06, 0.32, 0.64, 0.86, 1.00"},
+  {id:"T5.1",ph:"P5",nm:"Evaluation 2012–latest",title:"Extend evaluation to 2012–latest; sub-periods; robustness to decisions D-xx",skill:"snb-arima-evaluation",deps:["T3.3"],done:"Sub-period tables and a sensitivity check for every proposed decision"},
+  {id:"T5.2",ph:"P5",nm:"Error decomposition",title:"(optional) Error decomposition: oil price and exchange-rate surprises (paper p. 9)",skill:"snb-arima-evaluation",deps:["T3.3"],done:"Error regressions on oil and FX surprises; compare with R² ≈ 60 % in the paper"},
+  {id:"T6.1",ph:"P6",nm:"Thesis tables + text",title:"Paper-vs-replication comparison, LaTeX tables, figures, methods text",skill:"snb-arima-report",deps:["T3.3"],done:"LaTeX tables and figures generated from outputs, methods draft, deviations table"}
+];
+
+const SKILLS = [
+  {id:"snb-arima-next-task",tasks:"T0.0–T0.2 · every session",use:"Start of every session: picks the next unblocked task, runs its skill, updates the board and runs the micro retro.",out:"Updated task board, decisions log, retro entry",checks:["Never marks a task done without a passing check","Splits oversized tasks into sub-IDs"]},
+  {id:"snb-arima-data",tasks:"T1.1–T1.3",use:"Find, download and document raw data; transcribe the paper's appendix tables.",out:"data/raw files, codebook rows, docs/data_sources.md, io.py loaders, data/meta CSVs",checks:["No duplicate (date, variable) pairs","Table 9 sums to 92.788","Headline CPI spot check against Chart 2"]},
+  {id:"snb-arima-cpi-panel",tasks:"T1.4–T1.5",use:"Chain-link CPI bases, map items across basket revisions, build weights and the collection calendar.",out:"items.csv, cpi_items_long.csv, weights.csv, collection.csv, item_mapping.csv",checks:["2010 weight coverage ≈ 92.8 %","No unexplained jumps at link months","Trousers collection pattern matches Chart 1"]},
+  {id:"snb-arima-item-diagnostics",tasks:"T2.1",use:"ADF and KPSS tests, lag-12 seasonality, collection frequency, then the method per item.",out:"item_specs.csv per specification vintage",checks:["Specs use no data after the vintage date","ACF example plots for three item types"]},
+  {id:"snb-arima-item-models",tasks:"T2.2",use:"ARIMA(p,1,q) with optional seasonal AR(12) per item, SIC on a common sample, quarterly lags, fallbacks.",out:"forecast_item(), outputs/logs/item_orders.csv",checks:["SIC picks the true order in simulation","No-look-ahead test","Counts of grid-bound hits and fallbacks"]},
+  {id:"snb-arima-oil-rent",tasks:"T2.3–T2.4",use:"Oil-products ECM with crude in CHF; rent model with lagged mortgage-rate rises and falls entered separately.",out:"special.py, Table 3 inputs",checks:["Table 3 target RMSFEs","Exogenous data cut-off test"]},
+  {id:"snb-arima-aggregate",tasks:"T1.6, T2.5",use:"Chained Laspeyres aggregation, sub-aggregates for ARIMA(6)/(14), quarterly y-o-y.",out:"aggregate.py, Chart 4 replica",checks:["Gap to official CPI in Chart 4","Identical-items unit test","2 % growth gives 2.0"]},
+  {id:"snb-arima-evaluation",tasks:"T3.1–T3.3, T4.2, T5.x",use:"Pseudo-out-of-sample loop, benchmarks, RMSFE, relative RMSFE, DMW test with HLN correction.",out:"outputs/eval/, table1–4.csv, compare_paper.csv",checks:["Random-walk sanity case","No-look-ahead test","Forecast counts per horizon"]},
+  {id:"snb-arima-kalman-extension",tasks:"T4.1",use:"State space for irregular collection: SARIMAX on log levels with non-collection months left empty.",out:"kalman_ext.py, Chart 3 replica",checks:["Simulation recovers parameters","Monthly collection gives the plain ARIMA result"]},
+  {id:"snb-arima-report",tasks:"T6.1",use:"LaTeX tables in the paper's layout, chart replicas, paper-vs-ours comparison, methods draft.",out:"outputs/tables/*.tex, figures, docs/methods_draft.md",checks:["Every number traces to a CSV in outputs/","Tables compile"]},
+  {id:"skill-feedback-loop",tasks:"after every task and phase",use:"Turns your corrections, failed checks and the notes on this page into small, tested skill edits.",out:"docs/skill_feedback.md, <skill>/evals.md",checks:["Every edit has a logged piece of evidence","A regression scenario for every fix"],isNew:true}
+];
+
+const CLAIMS = [
+  {id:"meta",pg:"p. 1–2",topic:"Source",text:"Huwiler & Kaufmann, SNB Economic Studies 7/2013, 32 pages, JEL C22, C52, C53, E37."},
+  {id:"purpose",pg:"p. 3",topic:"Purpose",text:"Forecasts inflation over the coming 15 months. ARIMA models are estimated for each CPI expenditure item and aggregated with CPI expenditure weights."},
+  {id:"data",pg:"p. 4–5",topic:"Data",text:"Lowest level with published indices and weights: 217 items. Most series start May 2000 (CPI revision)."},
+  {id:"collection",pg:"p. 4",topic:"Collection frequency",text:"SFSO carries forward the last collected value. Until end-2007 only food, heating oil and fuels were collected monthly. Frequency was raised in 2008 and 2011."},
+  {id:"integration",pg:"p. 6",topic:"Integration order",text:"All items treated as I(1) and modelled in first log-differences. Checked with ADF and KPSS at 5 %; very few items reject."},
+  {id:"seasonal",pg:"p. 6",topic:"Seasonality & quarterly items",text:"A seasonal AR term at lag 12 is added when the ACF spikes at multiples of 12. Quarterly-collected items use only lags that are multiples of 3."},
+  {id:"sic",pg:"p. 6–7",topic:"Lag selection",text:"Lag order by the Schwarz criterion SIC = log(SSE/T) + k·log(T)/T, re-selected every time the models are re-estimated."},
+  {id:"adhoc",pg:"p. 7",topic:"Ad-hoc rules",text:"Last value, average m-o-m or average y-o-y growth when a forecast is implausible, an item is too new, or it is collected less than once a quarter. Known special factors enter as add-factors."},
+  {id:"oil",pg:"p. 7",topic:"Oil products",text:"Heating oil, petrol and diesel use an ECM with the crude oil spot price in CHF. Over the horizon, crude in CHF stays at the average of the last 10 daily observations."},
+  {id:"rent",pg:"p. 7–8",topic:"Rents",text:"Quarterly ARIMA in first differences plus the 4th lag of the mortgage-rate change, split into positive and negative changes. The mortgage rate is held constant over the horizon."},
+  {id:"eval",pg:"p. 8–10",topic:"Evaluation setup",text:"2004–2011, quarterly y-o-y inflation, horizons 1–5 quarters, two months of the current quarter known. The CPI is not revised, so pseudo-OOS is close to real time."},
+  {id:"tests",pg:"p. 10",topic:"Tests",text:"RMSFE and relative RMSFE. Diebold–Mariano–West test with the Harvey–Leybourne–Newbold correction against Student t(T−1), bold at 10 %."},
+  {id:"levels",pg:"p. 10–11, 21–25",topic:"Disaggregation",text:"Levels 1, 6, 14 and 182. The 182 items cover 92.788 % of 2010 weights. Oil and rents use plain ARIMA in Table 2."},
+  {id:"kalman",pg:"p. 13–15, 26–28",topic:"Extension",text:"State space with latent monthly changes. Observed change = sum since the last collection. Changes < 1e-3 count as no collection. Sample from 1993, collection months taken from the previous year."},
+  {id:"oilr2",pg:"p. 9",topic:"Error sources",text:"Regressing real-time errors on crude-oil price changes: R² ≈ 0 at h = 1 and about 60 % for longer horizons. Large miss in 2011Q4 from the CHF appreciation."}
+];
+
+const TABLES = [
+  {id:"t1",title:"Table 1 · Real-time performance",pg:"p. 11",rows:[
+    ["Real-time ARIMA",[0.04,0.36,0.66,0.83,0.96]],
+    ["SNB conditional forecast",[2.40,1.25,1.13,1.11,1.07],[0.003,0.170,0.280,0.530,0.680]],
+    ["Consensus Economics",[3.43,1.32,1.04,1.04,1.01],[0.001,0.028,0.465,0.582,0.918]],
+    ["AR(1)",[3.37,1.19,1.08,1.08,1.06],[0.004,0.087,0.287,0.223,0.292]]]},
+  {id:"t2",title:"Table 2 · Optimal disaggregation",pg:"p. 12",rows:[
+    ["ARIMA (182)",[0.08,0.41,0.72,0.92,1.04]],
+    ["ARIMA (14)",[1.01,1.19,1.04,1.04,1.01],[0.970,0.182,0.254,0.242,0.898]],
+    ["ARIMA (6)",[1.03,1.17,1.05,1.05,1.03],[0.844,0.002,0.236,0.215,0.625]],
+    ["ARIMA (1)",[1.27,1.60,1.40,1.43,1.29],[0.220,0.002,0.007,0.112,0.317]]]},
+  {id:"t3",title:"Table 3 · Oil products and rents",pg:"p. 13",rows:[
+    ["Oil products (ECM)",[1.14,6.72,12.49,15.25,17.10]],
+    ["Oil products (ARIMA)",[1.34,1.30,1.13,1.07,1.04],[0.030,0.034,0.256,0.497,0.710]],
+    ["Oil products (real-time)",[0.70,1.10,1.08,1.06,1.04],[0.133,0.268,0.151,0.189,0.040]],
+    ["Rents (ARIMA + mortgage rate)",[0.00,0.24,0.46,0.56,0.61]],
+    ["Rents (ARIMA)",[null,1.18,1.44,1.72,1.90],[null,0.148,0.005,0.000,0.000]],
+    ["Rents (real-time)",[null,1.07,1.01,1.01,1.10],[null,0.670,0.975,0.967,0.793]]]},
+  {id:"t4",title:"Table 4 · Extended ARIMA",pg:"p. 15",rows:[
+    ["Extended ARIMA (182)",[0.06,0.32,0.64,0.86,1.00]],
+    ["ARIMA (182)",[1.18,1.28,1.11,1.07,1.04],[0.278,0.067,0.157,0.184,0.438]],
+    ["Real-time ARIMA",[0.57,1.12,1.02,0.97,0.95],[0.003,0.321,0.466,0.258,0.203]]]}
+];
+
+const DECISIONS = [
+  {id:"D-01",gap:"G1",title:"Item models include a constant (drift in log levels)",why:"Mean item inflation is not zero. The paper drops the constant only to keep the exposition simple (p. 6).",alt:"No constant; compare at h ≥ 3."},
+  {id:"D-02",gap:"G2",title:"SIC grid p ∈ {0…12}, q ∈ {0,1,2}; quarterly items p ∈ {0…4} quarterly lags",why:"Covers a year of dynamics and keeps the search cheap.",alt:"q up to 4; report how often the grid bounds bind."},
+  {id:"D-03",gap:"G3",title:"Expanding window from item start, re-estimated at every quarterly origin",why:"The paper says the lag order is selected every time the models are re-estimated (p. 7).",alt:"Rolling 10-year window."},
+  {id:"D-04",gap:"G4",title:"Origins Feb/May/Aug/Nov 2004 … Nov 2011 (32), errors where actuals exist",why:"Matches “2004–2011” and the two-months-known rule.",alt:"One common target window for all horizons."},
+  {id:"D-05",gap:"G5",title:"AR(1) benchmark on monthly Δlog headline CPI, iterated forward",why:"The paper only says “simple autoregressive forecast … same information set” (p. 8).",alt:"AR(1) on quarterly y-o-y inflation."},
+  {id:"D-06",gap:"G12",title:"KOF consensus replaces Consensus Economics",why:"Consensus Economics is paywalled. The KOF files are copied into data/raw in T0.0.",alt:"Report separately and flag as not identical."},
+  {id:"D-07",gap:"—",title:"No add-factors in pseudo-OOS (VAT, tobacco, electricity)",why:"The paper also ignores add-factors in its pseudo-OOS exercise (p. 12).",alt:"VAT-adjusted variant as a robustness check."},
+  {id:"D-08",gap:"—",title:"Standalone repo; raw data in data/raw, tracked in git if licence and size allow",why:"Everything the project needs lives in Arima-model/, so results stay reproducible even if a source changes.",alt:"Always gitignore raw data and re-download it."}
+];
+
+const OPENS = [
+  {id:"bfs-urls",text:"Exact download pages and file names for item-level CPI indices and yearly weights from the Federal Statistical Office.",where:"T1.1 · snb-arima-data"},
+  {id:"bases",text:"CPI base months after December 2010 (2015, 2020, later) and from which year weights are updated annually.",where:"T1.1, T1.4 · snb-arima-cpi-panel"},
+  {id:"rent-months",text:"Rent collection months before 2008. Since 2008 they are Feb, May, Aug, Nov.",where:"T1.5, T2.4"},
+  {id:"utf16",text:"The old requirements.txt is saved as UTF-16; the copy in this repo will be re-saved as UTF-8 so pip install -r works.",where:"T0.0"},
+  {id:"consensus",text:"KOF consensus is not the same survey as Consensus Economics, so the Table 1 consensus row is only roughly comparable.",where:"D-06 · T3.2"},
+  {id:"realtime",text:"The SNB's real-time ARIMA forecasts are not public. The Table 1 “real-time ARIMA” row can only be approximated with the rebuilt model.",where:"T3.2 · T6.1"},
+  {id:"ar1",text:"The paper does not say on which series and frequency the AR(1) benchmark runs.",where:"D-05 · T3.2"},
+  {id:"drift",text:"The drift setup in statsmodels for the Kalman extension (trend=\"t\" with d = 1) must be confirmed by a simulation test first.",where:"T4.1 · snb-arima-kalman-extension"}
+];
+
+/* ---------- helpers ---------- */
+function h(tag, props, ...kids){
+  const e = document.createElement(tag);
+  if (props) for (const [k,v] of Object.entries(props)){
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on") && typeof v === "function") e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : String(v));
+  }
+  for (const kid of kids.flat()){
+    if (kid == null || kid === false) continue;
+    e.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return e;
+}
+const $ = (s, r=document) => r.querySelector(s);
+const safeId = s => String(s).replace(/[^A-Za-z0-9_\-.~:@+]/g, "-");
+const fmt = v => v == null ? "–" : v.toFixed(2);
+const fmtP = v => v == null ? "(–)" : "(" + v.toFixed(3) + ")";
+const timeAgo = iso => { try { const d = new Date(iso); return d.toLocaleString(undefined,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); } catch(e){ return ""; } };
+
+/* ---------- review registry ---------- */
+const ITEMS = []; // {rid, section, label}
+const reg = (section, key, label) => { const rid = safeId(section + "-" + key); ITEMS.push({rid, section, label}); return rid; };
+TASKS.forEach(t => t.rid = reg("task", t.id, t.id + " " + t.title));
+CLAIMS.forEach(c => c.rid = reg("claim", c.id, c.topic + " (" + c.pg + ")"));
+TABLES.forEach(t => t.rid = reg("claim", t.id, t.title + " (" + t.pg + ")"));
+DECISIONS.forEach(d => d.rid = reg("decision", d.id, d.id + " " + d.title));
+SKILLS.forEach(s => s.rid = reg("skill", s.id, s.id));
+OPENS.forEach(o => o.rid = reg("open", o.id, o.text));
+const ITEM_BY_ID = Object.fromEntries(ITEMS.map(i => [i.rid, i]));
+
+let reviews = {};
+let db = null;
+let canWrite = false;
+const chains = {};
+const CHOICES = [["ok","Looks right"],["fix","Needs fix"],["unsure","Unsure"]];
+const DEC_CHOICES = [["ok","Confirm"],["fix","Change"],["unsure","Unsure"]];
+
+function reviewControl(rid, opts){
+  opts = opts || {};
+  const choices = opts.choices || CHOICES;
+  const wrap = h("div", {class:"rv" + (opts.compact ? " compact" : ""), "data-rid":rid});
+  const btns = h("div", {class:"rv-btns", role:"group", "aria-label":"Review verdict"});
+  for (const [val, label] of choices){
+    btns.append(h("button", {type:"button", class:"rv-btn", "data-val":val, "aria-pressed":"false",
+      onclick: () => setStatus(rid, val)}, label));
+  }
+  const ta = h("textarea", {id:"note-" + rid, rows:"2", placeholder:"Note for Claude (optional)", "aria-label":"Note"});
+  const save = h("button", {type:"button", class:"rv-save", hidden:true, onclick: () => saveNote(rid)}, "Save note");
+  const meta = h("span", {class:"rv-meta"});
+  ta.addEventListener("input", () => { ta.dataset.dirty = "1"; save.hidden = false; });
+  ta.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") saveNote(rid); });
+  wrap.append(btns, ta, h("div", {class:"rv-foot"}, save, meta));
+  paintControl(wrap);
+  return wrap;
+}
+
+function paintControl(wrap){
+  const rid = wrap.dataset.rid;
+  const r = reviews[rid] || {};
+  wrap.querySelectorAll(".rv-btn").forEach(b => {
+    b.setAttribute("aria-pressed", String(r.status === b.dataset.val));
+    b.disabled = !db || !canWrite;
+  });
+  const ta = wrap.querySelector("textarea");
+  ta.disabled = !db || !canWrite;
+  if (ta.dataset.dirty !== "1" && document.activeElement !== ta) ta.value = r.note || "";
+  const meta = wrap.querySelector(".rv-meta");
+  meta.textContent = r.updatedAt ? "saved " + timeAgo(r.updatedAt) : "";
+}
+
+function paintAll(){
+  document.querySelectorAll(".rv[data-rid]").forEach(paintControl);
+  document.querySelectorAll(".task[data-rid]").forEach(b => {
+    const dot = b.querySelector(".rv-dot"); if (dot) dot.dataset.s = (reviews[b.dataset.rid] || {}).status || "";
+  });
+  paintProgress();
+}
+
+function paintProgress(){
+  const done = ITEMS.filter(i => reviews[i.rid] && reviews[i.rid].status).length;
+  $("#pill-n").textContent = done; $("#pill-t").textContent = ITEMS.length;
+  $("#st-rev").textContent = Math.round(100 * done / ITEMS.length) + "%";
+  $("#st-rev-s").textContent = done + " of " + ITEMS.length + " items checked";
+  const fixes = ITEMS.filter(i => reviews[i.rid] && reviews[i.rid].status === "fix").length;
+  if (fixes) $("#st-rev-s").textContent += " · " + fixes + " need a fix";
+  const decOk = DECISIONS.filter(d => (reviews[d.rid] || {}).status === "ok").length;
+  $("#st-dec").textContent = decOk + " / " + DECISIONS.length;
+  document.querySelectorAll("[data-progress]").forEach(el => {
+    const sec = el.dataset.progress;
+    const items = ITEMS.filter(i => i.section === sec);
+    const n = items.filter(i => reviews[i.rid] && reviews[i.rid].status).length;
+    el.textContent = n + " / " + items.length + " checked";
+  });
+}
+
+function writeReview(rid, patch){
+  if (!db || !canWrite) return;
+  const item = ITEM_BY_ID[rid];
+  const cur = reviews[rid] || {};
+  const body = {section:item.section, label:item.label, status:cur.status || null, note:cur.note || "", ...patch, updatedAt:new Date().toISOString()};
+  reviews[rid] = body;
+  paintAll();
+  chains[rid] = (chains[rid] || Promise.resolve())
+    .then(() => db.collection("reviews").doc(rid).set(body))
+    .catch(err => {
+      if (err && err.code === "invalid_argument") { canWrite = false; setBanner("bad", "This view can read the review but not save it. Ask the page owner for edit access."); paintAll(); }
+      else setBanner("bad", "Could not save the last change (" + ((err && err.code) || "error") + "). Try again in a moment.");
+    });
+}
+function setStatus(rid, val){
+  const cur = (reviews[rid] || {}).status;
+  writeReview(rid, {status: cur === val ? null : val});
+}
+function saveNote(rid){
+  const wrap = document.querySelector('.rv[data-rid="' + rid + '"]');
+  if (!wrap) return;
+  const ta = wrap.querySelector("textarea");
+  delete ta.dataset.dirty;
+  wrap.querySelector(".rv-save").hidden = true;
+  writeReview(rid, {note: ta.value.trim()});
+}
+
+function setBanner(kind, text){
+  const b = $("#db-banner");
+  b.dataset.kind = kind; b.textContent = text; b.hidden = false;
+}
+
+/* ---------- render: pipeline ---------- */
+let selected = "T0.1";
+const unlocks = id => TASKS.filter(t => t.deps.includes(id)).map(t => t.id);
+
+function renderPhases(){
+  const root = $("#phases");
+  root.textContent = "";
+  for (const ph of PHASES){
+    const col = h("div", {class:"col"});
+    for (const t of TASKS.filter(x => x.ph === ph.id)){
+      col.append(h("button", {type:"button", class:"task", "data-id":t.id, "data-rid":t.rid, "aria-pressed":"false",
+        onclick: () => select(t.id)},
+        h("div", {class:"id"}, CRIT.has(t.id) ? h("span", {class:"sq", "aria-label":"critical path"}) : null, t.id,
+          h("span", {class:"grow"}), h("span", {class:"rv-dot", "aria-hidden":"true"})),
+        h("div", {class:"nm"}, t.nm)));
+    }
+    root.append(h("div", {class:"phase"}, h("h3", null, h("b", null, ph.id), " " + ph.name), col));
+  }
+}
+
+function select(id){
+  selected = id;
+  const t = TASKS.find(x => x.id === id);
+  const deps = new Set(t.deps), next = new Set(unlocks(id));
+  const root = $("#phases");
+  root.classList.add("has-sel");
+  root.querySelectorAll(".task").forEach(b => {
+    const bid = b.dataset.id;
+    b.classList.toggle("is-sel", bid === id);
+    b.classList.toggle("is-dep", deps.has(bid));
+    b.classList.toggle("is-next", next.has(bid));
+    b.setAttribute("aria-pressed", String(bid === id));
+  });
+  const skill = SKILLS.find(s => s.id === t.skill);
+  const depChips = t.deps.length ? t.deps.map(d => h("button", {type:"button", class:"chip", onclick: () => select(d)}, d)) : [h("span", {class:"muted"}, "nothing, can start now")];
+  const nextIds = unlocks(id);
+  const nextChips = nextIds.length ? nextIds.map(d => h("button", {type:"button", class:"chip", onclick: () => select(d)}, d)) : [h("span", {class:"muted"}, "end of a branch")];
+  const ph = PHASES.find(p => p.id === t.ph);
+  const det = $("#detail");
+  det.textContent = "";
+  det.append(
+    h("div", null,
+      h("p", {class:"eyebrow"}, t.id + " · " + ph.id + " " + ph.name + (CRIT.has(id) ? " · critical path" : "")),
+      h("h3", null, t.title),
+      h("dl", {class:"kv"},
+        h("dt", null, "Status"), h("dd", null, h("span", {class:"chip status-todo"}, "to do")),
+        h("dt", null, "Skill"), h("dd", null, h("button", {type:"button", class:"chip skill", onclick: () => jumpSkill(t.skill)}, t.skill)),
+        h("dt", null, "Needs"), h("dd", null, depChips),
+        h("dt", null, "Unlocks"), h("dd", null, nextChips),
+        h("dt", null, "Done when"), h("dd", null, t.done),
+        skill ? h("dt", null, "Skill checks") : null,
+        skill ? h("dd", null, skill.checks.join(" · ")) : null)),
+    h("div", null, h("p", {class:"eyebrow"}, "Is this task scoped right?"), reviewControl(t.rid)));
+}
+
+function jumpSkill(id){
+  const el = document.getElementById("skill-" + id);
+  if (el) el.scrollIntoView({block:"start"});
+}
+
+/* ---------- render: paper ---------- */
+function renderClaims(){
+  const root = $("#claims");
+  for (const c of CLAIMS){
+    root.append(h("div", {class:"claim"},
+      h("div", {class:"pg"}, c.pg),
+      h("div", null, h("div", {class:"topic"}, c.topic), h("p", null, c.text)),
+      reviewControl(c.rid, {compact:true})));
+  }
+  const troot = $("#tables");
+  for (const t of TABLES){
+    const thead = h("thead", null, h("tr", null, h("th", null, "Model"), [1,2,3,4,5].map(i => h("th", null, "h=" + i))));
+    const tbody = h("tbody");
+    for (const [name, vals, ps] of t.rows){
+      const tr = h("tr", {class: ps ? "" : "abs"}, h("td", null, name));
+      vals.forEach((v, i) => {
+        const p = ps ? ps[i] : null;
+        const sig = p != null && p < 0.10;
+        tr.append(h("td", {class: sig ? "sig" : ""}, fmt(v), ps ? h("span", {class:"p"}, fmtP(p)) : null));
+      });
+      tbody.append(tr);
+    }
+    troot.append(h("div", {class:"tcard"},
+      h("div", {class:"lab"}, h("h3", null, t.title), h("span", {class:"mono muted sm"}, t.pg)),
+      h("div", {class:"tscroll"}, h("table", {class:"rm"}, thead, tbody)),
+      h("p", {class:"tnote"}, "Shaded row: absolute RMSFE in percentage points. Other rows: relative RMSFE with the DMW p-value below; red where p < 0.10."),
+      reviewControl(t.rid, {compact:true})));
+  }
+}
+
+/* ---------- render: decisions, skills, opens ---------- */
+function renderDecisions(){
+  const root = $("#decs");
+  for (const d of DECISIONS){
+    root.append(h("div", {class:"dec"},
+      h("div", {class:"hd"}, h("span", {class:"id"}, d.id), h("span", {class:"gap"}, "gap " + d.gap), h("span", {class:"st st-proposed"}, "proposed"), h("h3", null, d.title)),
+      h("p", null, d.why),
+      h("p", {class:"alt"}, "Alternative: " + d.alt),
+      reviewControl(d.rid, {choices:DEC_CHOICES, compact:true})));
+  }
+}
+function renderSkills(){
+  const root = $("#skills-grid");
+  const sel = $("#fb-skill");
+  for (const s of SKILLS){
+    sel.append(h("option", {value:s.id}, s.id));
+    root.append(h("article", {class:"skill" + (s.isNew ? " is-new" : ""), id:"skill-" + s.id},
+      h("div", null, h("div", {class:"nm"}, s.id), h("div", {class:"mono muted sm mt3"}, s.tasks + (s.isNew ? " · new" : ""))),
+      h("p", null, s.use),
+      h("div", null, h("div", {class:"lab"}, "Produces"), h("p", {class:"muted"}, s.out)),
+      h("div", null, h("div", {class:"lab"}, "Checks itself by"), h("ul", null, s.checks.map(c => h("li", null, c)))),
+      reviewControl(s.rid, {compact:true}),
+      h("button", {type:"button", class:"fb-link", onclick: () => { sel.value = s.id; $("#loop").scrollIntoView({block:"start"}); setTimeout(() => $("#fb-text").focus({preventScroll:true}), 350); }}, "Send detailed feedback on this skill")));
+  }
+}
+function renderOpens(){
+  const root = $("#opens");
+  for (const o of OPENS){
+    root.append(h("div", {class:"open"},
+      h("div", null, h("p", null, o.text), h("div", {class:"where"}, o.where)),
+      reviewControl(o.rid, {compact:true, choices:[["ok","Fine"],["fix","Needs action"],["unsure","Discuss"]]})));
+  }
+}
+
+/* ---------- feedback inbox ---------- */
+function renderInbox(docs){
+  const root = $("#inbox");
+  root.textContent = "";
+  $("#fb-count").textContent = docs.length ? docs.length + " item" + (docs.length === 1 ? "" : "s") : "";
+  if (!docs.length){
+    root.append(h("div", {class:"empty"}, "No feedback yet. What you send appears here, and Claude adds a reply and a status (applied, rejected or deferred) at the next retro."));
+    return;
+  }
+  const kinds = {wrong:"wrong instruction", missing:"missing step", ambiguous:"unclear", idea:"idea"};
+  for (const d of docs){
+    const v = d.data() || {};
+    const status = ["open","applied","rejected","deferred","proposed"].includes(v.status) ? v.status : "open";
+    const row = h("div", {class:"fbrow"},
+      h("div", {class:"hd"},
+        h("span", {class:"chip skill"}, String(v.skill || "general")),
+        h("span", {class:"mono muted sm"}, kinds[v.kind] || String(v.kind || "")),
+        h("span", {class:"grow"}),
+        h("span", {class:"st st-" + status}, status)),
+      h("div", {class:"txt"}, String(v.text || "")),
+      v.createdAt ? h("div", {class:"rv-meta"}, timeAgo(v.createdAt)) : null,
+      v.reply ? h("div", {class:"reply"}, "Claude: " + String(v.reply)) : null);
+    root.append(row);
+  }
+}
+
+$("#fb-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("#fb-msg");
+  const text = $("#fb-text").value.trim();
+  if (!text){ msg.textContent = "Write what should change before sending."; $("#fb-text").focus(); return; }
+  if (!db || !canWrite){ msg.textContent = "Feedback can't be saved in this view. Open the page on claude.ai while signed in."; return; }
+  const btn = $("#fb-send");
+  btn.disabled = true; msg.textContent = "Sending…";
+  try {
+    await db.collection("feedback").add({skill:$("#fb-skill").value, kind:$("#fb-kind").value, text, status:"open", reply:"", createdAt:new Date().toISOString()});
+    $("#fb-text").value = "";
+    msg.textContent = "Sent. Claude reads it at the next retro.";
+  } catch(err){
+    msg.textContent = (err && err.code === "invalid_argument") ? "This view can't save feedback. Ask the page owner for edit access." : "Could not send (" + ((err && err.code) || "error") + "). Try again in a moment.";
+  } finally { btn.disabled = false; }
+});
+
+/* ---------- boot ---------- */
+renderPhases();
+select(selected);
+renderClaims();
+renderDecisions();
+renderSkills();
+renderOpens();
+paintProgress();
+
+async function connect(){
+  const api = window.claude;
+  if (!api || typeof api.use !== "function"){
+    setBanner("warn", "Review storage is not available here. Open this page on claude.ai while signed in to save your marks and notes.");
+    return;
+  }
+  let gotData = false;
+  const timer = setTimeout(() => { if (!gotData) setBanner("warn", "Review storage can't be reached yet. Your marks will appear once it connects."); }, 10000);
+  try {
+    db = await api.use("db");
+    const user = await api.use("user");
+    if (!db){
+      clearTimeout(timer);
+      setBanner("warn", "Review storage is not available in this view. Open this page on claude.ai while signed in to save your marks and notes.");
+      paintAll(); return;
+    }
+    let w = null;
+    try { w = user ? await user.can("data.write") : null; } catch(e){ w = null; }
+    canWrite = w !== false;
+    paintAll();
+    db.collection("reviews").onSnapshot(snap => {
+      const next = {};
+      snap.docs.forEach(d => { const v = d.data(); if (v) next[d.id] = v; });
+      reviews = next;
+      paintAll();
+      if (!snap.metadata.fromCache && !gotData){
+        gotData = true; clearTimeout(timer);
+        if (canWrite) setBanner("ok", "Connected. Your marks and notes save automatically and Claude can read them.");
+        else setBanner("warn", "You can read this review, but your access level doesn't allow saving marks.");
+      }
+    }, err => {
+      clearTimeout(timer);
+      setBanner("bad", "Review storage stopped responding (" + ((err && err.code) || "error") + "). Reload the page to reconnect.");
+    });
+    db.collection("feedback").orderBy("createdAt", "desc").limit(100).onSnapshot(snap => renderInbox(snap.docs), () => {});
+  } catch(err){
+    clearTimeout(timer);
+    setBanner("warn", "Review storage is not available in this view.");
+  }
+}
+connect();
+})();
+</script>

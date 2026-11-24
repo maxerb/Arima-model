@@ -27,7 +27,9 @@ description: Orchestrator for the SNB disaggregate-ARIMA replication project. Us
 7. **Close.** Set status to `done` (or `blocked(<reason>)`), add a one-line note, add new decisions/data rows.
 8. **Micro retro.** Run the `skill-feedback-loop` micro retro for the skill(s) used: log findings in
    `docs/skill_feedback.md`. If this task finished a phase, run the macro retro instead (it includes the review page).
-9. Suggest the next task. Commit only if the user asks.
+9. **Commit and push.** Check that every command used in the task exists as code in the repo (AGENTS.md rule 7),
+   then commit (`T<id>: <what>`, with the attribution line) and `git push origin main`.
+10. Suggest the next task.
 
 ## Foundation tasks handled here
 
@@ -35,6 +37,8 @@ description: Orchestrator for the SNB disaggregate-ARIMA replication project. Us
 The project must not depend on anything outside `Arima-model/`. Ask the user before each step that touches files outside it.
 - Done 2026-11-24: repo lives at `HS26/Arima-model/` (moved out of `HS26/Bachelors-Thesis/`), `git init -b main`, `.gitignore`.
   The remote (e.g. GitHub) is created only when the user asks.
+- Do the copying with a script, `scripts/00_import_from_thesis_repo.py` (AGENTS.md rule 7), that prints what it copied
+  and skips files that already exist.
 - **Copy** (never move or delete) from the thesis repo `../Bachelors-Thesis/`: raw files `Data/raw/*` → `data/raw/`;
   `codebook.csv` (header and rows) → `codebook.csv`; `requirements.txt` → `requirements.txt` re-saved as **UTF-8** (it was
   UTF-16); `read_snb_cube` from `src/snb.py` → `src/arima_snb/io.py` with paths changed to `data/raw`.

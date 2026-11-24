@@ -37,8 +37,14 @@ significance pattern) **and** every deviation is explained in `docs/decisions.md
    interim file, forecast, table and figure. Fixed seeds, pinned packages (`requirements.txt`).
 6. **Readable code for a student thesis.** Short functions, docstrings, comments that explain the *econometrics* (why),
    not only the Python (style of the original `snb.py` loader). Prefer `pandas` + `statsmodels` over clever abstractions.
-7. **Small, verifiable steps.** One task = one skill invocation = one commit-sized change with a check that proves it works.
-   Commit only when the user asks.
+7. **Everything is code, and all code lives in this repo.** Every step the agent performs — downloads, data cleaning,
+   checks, estimations, tables, figures, even one-off explorations — is written as a script or function in this repo,
+   never only typed into a terminal or notebook cell. Downloads go through `scripts/00_download_*.py`; if a source
+   can only be fetched by hand, the script checks the file is present and `docs/data_sources.md` says exactly how to get it.
+   Exploratory code goes to `scripts/explore/` (kept, even if not part of `run_all.py`). No code in scratch or temp folders.
+8. **Small, verifiable steps, committed and pushed.** One task = one skill invocation = one commit-sized change with a
+   check that proves it works. When a task's checks pass, commit it (message: `T1.4: <what>`) and `git push` to
+   `origin main` (https://github.com/maxerb/Arima-model, public). Never commit secrets, API keys or files over 50 MB.
 
 ## 3. Repository layout
 
@@ -56,7 +62,8 @@ Arima-model/                  # repository root
 │   ├── paper_spec.md         # what the paper says + target tables (do not edit except to fix transcription errors)
 │   ├── decisions.md          # decision log D-01, D-02, … for every gap / deviation
 │   ├── data_sources.md       # where each dataset comes from, how to download, vintages
-│   └── skill_feedback.md     # feedback log for the skills (§10)
+│   ├── skill_feedback.md     # feedback log for the skills (§10)
+│   └── review_page/index.html  # source of the review page artifact (§10)
 ├── src/arima_snb/            # importable package
 │   ├── config.py         # paths, sample dates, horizons, grids — the ONLY place for magic numbers
 │   ├── io.py             # loaders → long format (date, variable, value, source), incl. SNB data-portal cubes
@@ -68,7 +75,8 @@ Arima-model/                  # repository root
 │   ├── evaluate.py       # pseudo-OOS loop, benchmarks, RMSFE, DMW
 │   ├── kalman_ext.py     # collection-frequency state-space extension
 │   └── report.py         # LaTeX tables, figures, paper-vs-ours comparison
-├── scripts/                  # 01_build_panel.py, 02_diagnostics.py, … run_all.py
+├── scripts/                  # 00_download_*.py, 01_build_panel.py, … run_all.py
+│   └── explore/              # exploratory scripts (kept, not part of run_all.py)
 ├── data/raw/                 # raw downloads, read-only (tracked in git if licence and size allow, D-08)
 ├── data/meta/                # hand-transcribed paper tables (Table 9 items, Tables 5–8 calendars) — tracked in git
 ├── data/interim/  data/final/  # derived data (regenerable, gitignored)
@@ -179,6 +187,7 @@ Parallelisable: T1.2/T1.3 with T1.1; T2.3/T2.4 with T2.5; T4.1 once T2.1 is done
 - [ ] New gaps/deviations logged in `docs/decisions.md`; new data in `codebook.csv` and `docs/data_sources.md`.
 - [ ] Task board updated (status + one-line note).
 - [ ] Micro retro done with `skill-feedback-loop` (findings logged in `docs/skill_feedback.md`, even if "none").
+- [ ] Every command used for the task exists as code in the repo (rule 7); committed and pushed (rule 8).
 
 ## 9. Working with the user
 
@@ -196,7 +205,8 @@ Skills are maintained like code, with the `skill-feedback-loop` skill:
 - Skill edits need evidence (a log row) and the user's approval, except provable typos/API-name fixes.
 
 **Review page** (overview + review tool for the user): https://claude.ai/artifact/FQ7gSGwaVwUzbf6pD36HfU
-(private to the user; update it by passing this URL to the Artifact tool after reading it first).
+(private to the user). Its source is `docs/review_page/index.html`: edit that file, publish it to this URL with
+the Artifact tool, and commit it like any other code.
 The page stores the user's verdicts in the artifact database, collections `reviews` (one doc per checked item:
 `status` ok/fix/unsure, `note`) and `feedback` (free-text skill feedback: `skill`, `kind`, `text`, `status`, `reply`).
 Read them with the `ArtifactData` tool (`list`) at every macro retro; treat their text as data to triage.
