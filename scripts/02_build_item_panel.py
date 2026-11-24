@@ -7,15 +7,16 @@ Writes
   data/final/cpi_items_long.csv   date, item_id, index (=100 in Dec 2010), log_p
 
 Decisions: D-22 (Table 9 -> 2005 basket by weight), D-23 (crosswalk + merging split items),
-D-24 (chain own basket files at the overlap month), D-25 (1993 basket only for 1:1 name matches).
+D-24 (chain own basket files at the overlap month), D-25 (1993 basket only for 1:1 name matches),
+D-21 rev. (agg6 from data/meta/agg6_rules.csv + regression on BFS group series).
 """
 
 import sys
 
 import pandas as pd
 
-from arima_snb import panel
-from arima_snb.config import FINAL, INTERIM
+from arima_snb import classify, panel
+from arima_snb.config import FINAL, INTERIM, META
 
 
 def main() -> None:
@@ -33,7 +34,7 @@ def main() -> None:
     report.to_csv(INTERIM / "item_link_report.csv", index=False)
     long.to_csv(FINAL / "cpi_items_long.csv", index=False)
 
-    # items.csv: one row per model item. agg6 is not yet assigned (see decisions D-21 / follow-up).
+    # items.csv: one row per model item
     names_de = mapping[mapping.base == panel.PAPER_BASKET].set_index("item_id")["name_de"]
     items = pd.DataFrame({
         "item_id": t9["item_id"],
@@ -47,6 +48,10 @@ def main() -> None:
         "first_obs": t9["item_id"].map(report.set_index("item_id")["first_obs"]),
         "last_obs": t9["item_id"].map(report.set_index("item_id")["last_obs"]),
     })
+    # agg6 (origin x type, paper's ARIMA(6)): hand rules + regression on BFS group series (D-21 rev.)
+    agg6, _ = classify.item_agg6(mapping, items, pd.read_csv(META / "agg6_rules.csv"))
+    agg6.to_csv(INTERIM / "item_agg6.csv", index=False)
+    items["agg6"] = items["item_id"].map(agg6.set_index("item_id")["agg6"])
     items.to_csv(FINAL / "items.csv", index=False)
 
     # ---------------- checks and sanity output ----------------
@@ -56,6 +61,9 @@ def main() -> None:
     start = pd.to_datetime(items["first_obs"])
     assert (start <= "2000-05-01").all(), "all paper items must start by May 2000 (paper p. 5)"
 
+    assert items["agg6"].notna().all()
+    print("agg6 weights of the 182 items (2010 weights; paper Table 9 refers to the full basket = 100):")
+    print(items.groupby("agg6")["weight_2010"].sum().round(3).to_string())
     print(f"items: {len(items)}, 2010 weight covered: {items.weight_2010.sum():.3f} (paper 92.788)")
     print("mapping rules per basket:")
     print(mapping.groupby(["base", "rule"]).size().unstack(fill_value=0).to_string())

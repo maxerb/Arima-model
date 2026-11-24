@@ -64,3 +64,4 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - Transcription bug from T1.3 fixed (item 9 "Table 8 continued Beef" -> "Beef"; page header was not skipped).
 - agg6 follow-up (2026-11-24): BFS methods PDFs (2005, 2010 bases) publish domestic/imported and goods/services only as totals (Anhang 2), no per-position list. Membership regression on BFS grouping series (`src/arima_snb/classify.py`) reproduces the paper's ARIMA(6) totals on the full basket (16.3/28.2/18.9/8.6/23.9 vs 16.9/27.8/19.5/8.7/23.4) but item-level labels are not identified (e.g. margarine -> public services). Not wired into the pipeline; awaiting user decision.
 
+- agg6 resolved with user (rules + data check, D-21 rev.). Candidate skill edit (snb-arima-cpi-panel step 4): agg6 is not in Table 9 nor in BFS files; use data/meta/agg6_rules.csv + classify.item_agg6.

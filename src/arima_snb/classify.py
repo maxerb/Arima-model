@@ -79,7 +79,7 @@ def leaf_keys() -> pd.DataFrame:
 
 
 def build_system(classification: str, keys: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, list, list]:
-    """Stack the aggregation equations of all months, categories and baskets: A @ s = b."""
+    """Stack the aggregation equations of all months, categories and baskets: A @ s = b (columns key*K + cat)."""
     cats = list(CLASSIFICATIONS[classification])
     ukeys = list(dict.fromkeys(keys["key"]))
     col = {(k, c): j for j, (k, c) in enumerate((k, c) for k in ukeys for c in cats)}  # j = key*K + cat
@@ -116,10 +116,24 @@ def build_system(classification: str, keys: pd.DataFrame) -> tuple[np.ndarray, n
     return np.array(A), np.array(b), ukeys, cats
 
 
-def estimate_membership(classification: str, keys: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Non-negative least squares for the memberships; returns one row per key with s per category and the label."""
+def estimate_membership(classification: str, keys: pd.DataFrame | None = None,
+                        allowed: dict | None = None) -> pd.DataFrame:
+    """Non-negative least squares for the memberships; returns one row per key with s per category and the label.
+
+    `allowed` maps a key to the category names it may belong to (from the hand rules, D-21 rev.); the other
+    categories of that key are fixed at 0. Fixing the clear cases is what makes the unclear ones identified.
+    """
     keys = leaf_keys() if keys is None else keys
     A, b, ukeys, cats = build_system(classification, keys)
+    names = [CLASSIFICATIONS[classification][c] for c in cats]
+    if allowed:
+        keep = np.ones(A.shape[1], dtype=bool)
+        for k, ok in allowed.items():
+            if k in ukeys:
+                for j, nm in enumerate(names):
+                    if nm not in ok:
+                        keep[ukeys.index(k) * len(cats) + j] = False
+        A = np.where(keep, A, 0.0)          # a dropped column can only take the value 0 in nnls
     # Scale the data rows so that they are comparable to the sum-to-one rows
     n_data = len(b) - len(ukeys)
     scale = np.abs(A[:n_data]).max() or 1.0
@@ -157,57 +171,78 @@ def rebuild_check(classification: str, keys: pd.DataFrame, labels: pd.Series) ->
 
 
 # ---------------------------------------------------------------------------
-# ARIMA(6) labels for the paper items (Table 9 sub-aggregate names)
+# ARIMA(6) labels for the paper items: hand rules + data check (D-21 rev.)
 # ---------------------------------------------------------------------------
 AGG6_NAMES = {
-    "goods": "Domestic durable goods",          # paper's label; contains all domestic goods (see D-21)
-    "private services": "Domestic private services",
-    "public services": "Public services",
+    "goods": "Domestic durable goods",          # paper's label; it contains all domestic goods (D-21)
+    "private": "Domestic private services",
+    "public": "Public services",
     "imported": "Imported goods and services excl. oil products",
     "rent": "Rents",
     "oil": "Oil products",
 }
 GOODS = ["non-durable goods", "semi-durable goods", "durable goods"]
+TYPE_ALLOWED = {"goods": set(GOODS), "private": {"private services"}, "public": {"public services"}}
 
 
-def item_memberships(mapping: pd.DataFrame, items: pd.DataFrame, keys: pd.DataFrame | None = None,
-                     base: str = "LIK10B10", weight_year: int = 2011) -> pd.DataFrame:
-    """Domestic share and type shares per paper item, and its ARIMA(6) label (D-21).
-
-    Item shares = weighted mean of the shares of the item's leaf positions in the 2010 basket (the first basket
-    with grouping series). Oil products and rents keep their own groups. The label rounds the shares: domestic if
-    the domestic share > 0.5, and then goods / private / public services by the largest share.
-    """
-    keys = leaf_keys() if keys is None else keys
-    so = estimate_membership("origin", keys)
-    st = estimate_membership("type", keys)
+def item_leaf_keys(mapping: pd.DataFrame, keys: pd.DataFrame, base: str = "LIK10B10") -> dict[str, list]:
+    """Item -> membership keys of its leaf positions in the 2010 basket (first basket with group series)."""
     _, pos = panel.load_basket(base)
     kb = keys[keys.base == base].set_index("pos_no")["key"]
-    sheet = dict((c, sh) for c, sh, _ in panel.BASKETS)[base]
+    out = {}
+    for item, p in mapping[mapping.base == base].set_index("item_id")["pos_nos"].items():
+        out[item] = [kb[leaf] for x in str(p).split(";") for leaf in descendants(pos, int(x))]
+    return out
+
+
+def item_agg6(mapping: pd.DataFrame, items: pd.DataFrame, rules: pd.DataFrame,
+              keys: pd.DataFrame | None = None, weight_year: int = 2011) -> tuple[pd.DataFrame, dict]:
+    """ARIMA(6) label per item from the hand rules (data/meta/agg6_rules.csv), origin 'data' -> regression.
+
+    Steps: (1) the rules fix the product type of every item and the origin of the clear items; these are imposed
+    on the item's leaf positions; (2) the origin regression (estimate_membership with `allowed`) then estimates
+    the domestic share of the remaining leaves; (3) an item with origin 'data' is domestic if its weighted
+    domestic share > 0.5. Returns the item table and the leaf labels (for the rebuild check).
+    """
+    keys = leaf_keys() if keys is None else keys
+    ikeys = item_leaf_keys(mapping, keys)
+    r = rules.set_index("item_id")
+    allowed_o, allowed_t = {}, {}
+    for item, ks in ikeys.items():
+        for k in ks:
+            allowed_t[k] = TYPE_ALLOWED[r.at[item, "type"]]
+            if r.at[item, "origin"] in ("domestic", "imported"):
+                allowed_o[k] = {r.at[item, "origin"]}
+    so = estimate_membership("origin", keys, allowed_o)
+    st = estimate_membership("type", keys, allowed_t)
+
     w_all = panel.load_weights()
-    w = w_all[(w_all.basket == sheet) & (w_all.year == weight_year)].drop_duplicates("pos_no").set_index("pos_no")["weight"]
+    w = w_all[(w_all.basket == "LIK2010") & (w_all.year == weight_year)].drop_duplicates("pos_no")
+    kb = keys[keys.base == "LIK10B10"].set_index("key")["pos_no"]
+    wk = kb.map(w.set_index("pos_no")["weight"]).fillna(0.0)
     rows = []
-    for _, it in items.iterrows():
-        p = mapping[(mapping.item_id == it.item_id) & (mapping.base == base)]["pos_nos"].iloc[0]
-        lv = [leaf for x in str(p).split(";") for leaf in descendants(pos, int(x))]
-        ww = w.reindex(lv).fillna(0.0)
-        ww = ww / ww.sum() if ww.sum() > 0 else pd.Series(1 / len(lv), index=lv)
-        r = {"item_id": it.item_id, "n_leaves": len(lv),
-             "domestic": float(sum(ww[x] * so.loc[kb[x], "domestic"] for x in lv))}
-        for c in st.columns[:5]:
-            r[c] = float(sum(ww[x] * st.loc[kb[x], c] for x in lv))
-        rows.append(r)
+    for item, ks in ikeys.items():
+        ww = wk.reindex(ks).fillna(0.0)
+        ww = ww / ww.sum() if ww.sum() > 0 else pd.Series(1 / len(ks), index=ks)
+        dom = float((ww.values * so.loc[ks, "domestic"].values).sum())
+        rows.append({"item_id": item, "type": r.at[item, "type"], "origin_rule": r.at[item, "origin"],
+                     "domestic_share": round(dom, 3)})
     d = pd.DataFrame(rows)
-    d["goods"] = d[GOODS].sum(axis=1)
+    d["domestic"] = np.where(d.origin_rule == "data", d.domestic_share > 0.5, d.origin_rule == "domestic")
     special = items.set_index("item_id")["special"].fillna("")
 
-    def label(r):
-        sp = special.get(r.item_id, "")
+    def label(x):
+        sp = special.get(x.item_id, "")
         if sp in ("oil", "rent"):
             return AGG6_NAMES[sp]
-        if r.domestic <= 0.5:
-            return AGG6_NAMES["imported"]
-        return AGG6_NAMES[max(["goods", "private services", "public services"], key=lambda c: r[c])]
+        return AGG6_NAMES[x.type] if x.domestic else AGG6_NAMES["imported"]
 
     d["agg6"] = d.apply(label, axis=1)
-    return d
+    # leaf labels for the rebuild check: item leaves get the item's final labels, other leaves the regression's
+    leaf_origin, leaf_type = so["label"].copy(), st["label"].copy()
+    for x in d.itertuples():
+        for k in ikeys[x.item_id]:
+            leaf_origin[k] = "domestic" if x.domestic else "imported"
+            if x.type != "goods":
+                leaf_type[k] = f"{x.type} services"
+    return d, {"origin": leaf_origin, "type": leaf_type}

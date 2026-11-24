@@ -66,3 +66,23 @@ def test_panel_contract():
     assert core.groupby("item_id").size().eq(188).all()
     # reference month Dec 2010 = 100
     assert np.allclose(long.loc[long.date == "2010-12-01", "index"], 100)
+
+
+def test_agg6_rules_file_complete():
+    """Every paper item has a valid hand rule for agg6 (D-21 rev.)."""
+    from arima_snb.config import META
+    rules = pd.read_csv(META / "agg6_rules.csv")
+    assert len(rules) == 182 and rules["item_id"].is_unique
+    assert set(rules["type"]) <= {"goods", "private", "public"}
+    assert set(rules["origin"]) <= {"domestic", "imported", "data"}
+    assert rules["reason"].notna().all()
+
+
+@pytest.mark.skipif(not (FINAL / "items.csv").exists(), reason="run scripts/02_build_item_panel.py")
+def test_agg6_labels():
+    items = pd.read_csv(FINAL / "items.csv").set_index("item_id")
+    assert items["agg6"].notna().all() and items["agg6"].nunique() == 6
+    assert (items.loc[items.special == "oil", "agg6"] == "Oil products").all()
+    assert (items.loc[items.special == "rent", "agg6"] == "Rents").all()
+    # public services close to the paper's 8.711 (items cover all public services of the basket)
+    assert abs(items.loc[items.agg6 == "Public services", "weight_2010"].sum() - 8.711) < 0.5
