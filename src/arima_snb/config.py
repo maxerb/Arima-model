@@ -48,6 +48,13 @@ P_MAX_QUARTERLY = 4                # D-02: quarterly items, lags in quarters (3,
 SEASONAL_PERIOD = 12               # seasonal AR term at lag 12 (eq. 2)
 MIN_OBS_MONTHLY = 36               # fewer observations -> ad-hoc rule (paper p. 7; threshold is ours)
 MIN_OBS_QUARTERLY = 12
+Q_MAX_QUARTERLY = 2                # D-36: MA lags in quarters (3 and 6 months) for quarterly items
+SEASONAL_PERIOD_QUARTERLY = 4      # D-36: seasonal AR at 4 quarters = 12 months
+MIN_SIC_OBS_MONTHLY = 24           # D-37: the common SIC sample keeps at least this many obs (grid shrinks otherwise)
+MIN_SIC_OBS_QUARTERLY = 12         # D-37: same for quarterly-sampled items
+FORECAST_STEPS = 13                # months after an origin in the 2nd month of a quarter to the end of quarter t+4 (h = 5)
+PLAUSIBLE_PCTL = (1, 99)           # D-11: 12-month forecast change outside these percentiles of history -> avg y-o-y
+ITEM_N_JOBS = 4                    # parallel worker processes for the item models (T2.2)
 
 # ---------------------------------------------------------------------------
 # Collection frequency (paper fn. 9)
