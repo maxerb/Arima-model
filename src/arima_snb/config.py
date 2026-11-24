@@ -68,3 +68,14 @@ EARLY_WEIGHT_PERIODS = [
     (1993, "1993-05-01", "1993-06-01", "2000-05-01"),   # 1993 basket, base May 1993; overlap month May 2000
     (2000, "2000-05-01", "2000-06-01", "2001-12-01"),   # 2000 basket, "2000/01" weights, base May 2000
 ]
+
+# ---------------------------------------------------------------------------
+# Item diagnostics (T2.1, paper p. 6, decisions D-31 ... D-34)
+# ---------------------------------------------------------------------------
+SPEC_VINTAGES = range(2003, 2026)  # D-31: spec vintage Y uses data to Dec Y, serves origins in year Y+1
+DIAG_ALPHA = 0.05                  # ADF/KPSS significance (paper p. 6)
+ACF_MAX_LAG = 36                   # months
+SEASONAL_LAGS = (12, 24)           # D-33: seasonal if ACF at lag 12 or 24 positive and significant
+FREQ_MONTHLY_MIN = 10              # D-34: collections per year >= 10 -> monthly
+FREQ_6X_MIN = 5                    # 5-9 -> "6x" (bimonthly-like), modelled monthly
+FREQ_QUARTERLY_MIN = 3             # 3-4 -> quarterly (lags 3, 6, 9, ...); 1-2 -> less than quarterly

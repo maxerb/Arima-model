@@ -16,6 +16,22 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 | F-006 | 2026-11-24 | snb-arima-data | T1.1 | missing | Old BFS files are .xls → needs `xlrd`; repeated PosNo for special groupings below the main hierarchy; index levels > 1000 for back-cast PCs/TVs | improvised step | Add these three to Pitfalls | applied |
 | F-007 | 2026-11-24 | snb-arima-data | T1.1 | one-off | Scripts must run with `.venv/Scripts/python` (package installed there), not the system python | failed check | none (environment) | – |
 | F-008 | 2026-11-24 | snb-arima-next-task | T0.0–T1.4 | missing | Review page never updated after tasks: statuses and decisions were typed into the HTML and no step refreshed it (showed 0/22 done and D-01…D-08 after 7 tasks and 25 decisions) | user question "does the page update when tasks are done?" | `scripts/build_review_page.py` generates both from AGENTS.md / decisions.md; new step 9 "Refresh the review page" in the skill; `tests/test_review_page.py` fails when stale (user approved) | applied |
+| F-009 | 2026-11-24 | snb-arima-data | T1.2 | wrong | SNB conditional forecasts said "hand-collect"; they exist as SNB cube `snbiprogq` | improvised step (T1.2 retro) | Name the cube in the datasets table | proposed |
+| F-010 | 2026-11-24 | snb-arima-data | T1.2 | wrong | Mortgage rates: BWO page is JS-only (no file); SNB `zikrepro` `M_MV` covers 1976–today | failed download | List `zikrepro` first, BWO only as reference | proposed |
+| F-011 | 2026-11-24 | snb-arima-data | T1.3 | wrong | Step 5 implies Table 9 has per-item agg6/agg14 (it has only totals) and gives printed pp. 21–25 (= PDF pp. 23–27) | improvised step | Real columns, agg6 left empty (D-21), both page numbers | proposed |
+| F-012 | 2026-11-24 | snb-arima-data | T1.3 | missing | Calendar 'x' marks have no position in the PDF text layer; page headers leak into rows ("Table 8 continued Beef") | improvised method | Add method: render pages to PNG, transcribe, cross-check mark counts with text layer; skip headers | proposed |
+| F-013 | 2026-11-24 | snb-arima-cpi-panel | T1.4/T1.5 | wrong | Table 9 weights are LIK2005-basket weights for 2010 and are printed one row off for items 85–93, 119–124; matching inherited it (shoe repairs mapped twice) | failed check found in T1.5 | Step 1: match by those weights then order; check no BFS position used twice unless a documented merge (D-22 rev.) | proposed |
+| F-014 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Step 3 says weights constant between revisions; BFS GEWICHTUNGEN has a column per year from 2002 (1993 col → 1993–99, 2000/01 → 2000–01); merges in later baskets need a split rule | improvised + asked user (D-26, D-27) | Replace step-3 rule; add split rule | proposed |
+| F-015 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Check "no jump > 20 % at link month" cannot detect wrong links (ratio linking never jumps) | failed check | Replace by agreement of linked changes with BFS back-casts (`panel.backcast_agreement`) | proposed |
+| F-016 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | missing | 1993 and 2025 baskets renumber positions; names repeat (retail vs restaurant wine/beer) | improvised rule D-25 | Add pitfall | proposed |
+| F-017 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Step 4: agg6 is neither in Table 9 nor in BFS files | resolved with user (D-21 rev.) | Point to `data/meta/agg6_rules.csv` + `classify.item_agg6` | proposed |
+| F-018 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | missing | Calendar rows are BFS sub-groups, not model items | improvised `data/meta/collection_calendar_items.csv` | Mention the hand map in step 5 | proposed |
+| F-019 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Coverage check 92.8 % is the paper's sum; true BFS weights give 92.70 % (skirts 0.230 vs 0.143) | check value | Change check to ≈ 92.7 % | proposed |
+| F-020 | 2026-11-24 | snb-arima-aggregate | T1.6 | wrong | Interface: `aggregate_index` takes index levels (`item_index`), not logs; `build_subaggregate_series` needs `items` | API mismatch with code | Copy real signatures | proposed |
+| F-021 | 2026-11-24 | snb-arima-aggregate | T1.6 | ambiguous | "verify base month for 2000–2007": answer is basket periods May 1993→May 2000, May 2000→Dec 2001, then yearly Dec chaining; old period must include the overlap month | D-29 | State it, cite D-29 | proposed |
+| F-022 | 2026-11-24 | snb-arima-next-task | T1.1/T1.2/T1.6 | missing | Recurring (F-007 + T1.2 + T1.6): scripts need `.venv/Scripts/python`; pip built matplotlib from source → `--only-binary=:all:`; `sed` with escaped pipes corrupted decisions.md → edit markdown tables with Python | 3 tasks | Add to Rules | proposed |
+| F-023 | 2026-11-24 | snb-arima-decision-research | D-xx batch | missing | User wanted all decisions in one file; PDFs unreadable via fetch could be read with Read(pages=…) | user request + improvised | Allow batch file `best_practice.md`; PDF fallback; table of unreachable sources | proposed |
+| F-024 | 2026-11-24 | snb-arima-next-task | T0.2 | one-off | T0.2 check `tests/test_decisions.py` not named in skill | improvised | none (T0.2 never recurs) | rejected |
 
 ## Summary per skill (updated at each macro retro)
 
@@ -81,3 +97,10 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - `build_subaggregate_series` needs the `items` table for groupings (signature in skill lacks it).
 - Tooling: matplotlib was not in requirements/venv; `pip install matplotlib==3.9.2` tried to build from source on this Python → use `--only-binary=:all:` (pinned 3.11.2).
 - Check passed: monthly y-o-y RMSE 0.067 pp (2001–2011); gaps > 0.2 pp only around the 2000 basket switch and 4 months 2018–2026.
+
+### Micro retro T2.1 (snb-arima-item-diagnostics), 2026-11-24
+- Skill default "two vintages (2003, 2007)" replaced by annual vintages at the user's choice (D-31); candidate edit: present vintage scheme as a choice, not a default.
+- Skill's frequency classes have no count thresholds; improvised ≥10 / 5–9 / 3–4 / ≤2 per year and max(inferred, calendar) because inferred flags undercount (D-34). Candidate edit: state thresholds and the undercount pitfall.
+- Skill says paper finds "very few" items failing I(1); our d_flag fires for 13–26 % of items. Not a skill error (d stays 1), worth noting as expected.
+- Tooling: system `python` lacks statsmodels; use `.venv/Scripts/python.exe`. Full run takes ~2.5 min (per-item filtering of collection.csv) — acceptable.
+- Checks passed: no-look-ahead test, rice non-seasonal, trousers quarterly→6x (2008)→monthly (2011), seasonal throughout (paper Chart 1).
