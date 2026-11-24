@@ -37,3 +37,8 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 ### Micro retro T0.2 (2026-11-24) — snb-arima-next-task
 - Finding: skill lists G4 among the "important" gaps to confirm, but the ask tool fits 4 questions; G4 (origins) was left `proposed` since it follows directly from the paper. No skill edit needed.
 - Added `tests/test_decisions.py` as the T0.2 check (skill did not name one) — candidate addition to the skill's T0.2 section.
+
+### Micro retro D-xx research (2026-11-24) — snb-arima-decision-research (new skill)
+- User asked for all decisions in one file; the skill prescribes one note per decision. Improvised `docs/decision_research/best_practice.md` with one section per D-xx. Candidate skill edit: allow a "batch mode" writing one combined file.
+- Many official PDFs failed for automated fetching (BFS image-only PDFs, IMF 404, StatCan/BoC/Harvard 403). Saved PDFs could be read page-by-page with the Read tool (worked for ECB WP 247 and SNB press release). Candidate skill edit: "if web-fetch gets an unreadable PDF, read the saved copy with Read(pages=…)"; list unreachable sources in a table instead of dropping them.
+- Local data check (KOF consensus) changed a decision (D-06 refine) — step 5 of the skill proved useful.
