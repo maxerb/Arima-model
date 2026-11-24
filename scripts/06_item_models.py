@@ -45,7 +45,7 @@ def main() -> None:
     LOGS.mkdir(parents=True, exist_ok=True)
     for df, path in [(fc, FORECASTS / f"{MODEL_NAME}_items.csv"), (log, LOGS / "item_orders.csv")]:
         if path.exists():
-            old = pd.read_csv(path, parse_dates=["origin"])
+            old = pd.read_csv(path, parse_dates=[c for c in ("origin", "target") if c in df])
             df = pd.concat([old[old.origin != origin], df], ignore_index=True)
         df.to_csv(path, index=False)
 

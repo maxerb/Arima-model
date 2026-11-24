@@ -40,7 +40,7 @@ def aggregate_index(item_index: pd.DataFrame, weights: pd.DataFrame,
     item_index: wide DataFrame, monthly DatetimeIndex x item_id columns (index levels, not logs).
     weights:    long DataFrame year, item_id, weight (any scale; normalised per period over the items that
                 have a weight and an observed index in the link month and month t, D-30).
-    Returns the aggregate with value 100 at the first link month.
+    Returns the aggregate with value 100 at the first link month that has data.
     """
     if items is not None:
         item_index = item_index[[c for c in item_index.columns if c in items]]
@@ -58,8 +58,11 @@ def aggregate_index(item_index: pd.DataFrame, weights: pd.DataFrame,
         ok = rel.notna()
         ww = ok.mul(w, axis=1)
         ratio = (rel.fillna(0) * ww).sum(axis=1) / ww.sum(axis=1)  # D-30: normalise over included items
-        if not out:
-            out[p.link] = level
+        started = any(np.isfinite(v) for v in out.values())
+        if not started and base.notna().any():
+            # The chain starts at the first period whose link month has data. For the total that is May 1993;
+            # a sub-aggregate whose items all enter later (e.g. Education, May 2000) starts there (T2.5).
+            out = {p.link: level}
         level_link = out.get(p.link, np.nan)
         for t, r in ratio.items():
             out[t] = level_link * r
@@ -89,3 +92,112 @@ def build_subaggregate_series(item_index: pd.DataFrame, weights: pd.DataFrame, i
         return aggregate_index(item_index, weights).to_frame("total")
     groups = items.groupby(level)["item_id"].apply(list)
     return pd.DataFrame({g: aggregate_index(item_index, weights, ids) for g, ids in groups.items()})
+
+
+# ---------------------------------------------------------------------------------------------------------
+# T2.5: from item forecasts to aggregate forecasts
+# ---------------------------------------------------------------------------------------------------------
+# An aggregate forecast is the same chained Laspeyres formula applied to a "spliced" item panel: the actual
+# item indices up to the origin, the forecast item indices after it (skill snb-arima-aggregate). Because the
+# formula is in index LEVELS, forecast log prices are exponentiated first (exp(log_p_hat) is the median, not
+# the mean, of a log-normal forecast; the paper aggregates point forecasts the same way, D-45).
+
+
+def weights_known_at(weights: pd.DataFrame, origin, last_year: int) -> pd.DataFrame:
+    """Weights an analyst knows at `origin`, extended to `last_year` (D-13).
+
+    BFS publishes the weights of year y with the January index of y (released in February), so at an origin in
+    year y (Feb, May, Aug or Nov) the weights of y are known and those of y+1 are not. Years after the origin
+    year reuse the latest known weights (D-13). Rows of later years in `weights` are dropped, never used.
+    """
+    origin = pd.Timestamp(origin)
+    known = weights[weights.year <= origin.year]
+    latest = known.year.max()
+    extra = [known[known.year == latest].assign(year=y) for y in range(latest + 1, last_year + 1)]
+    return pd.concat([known, *extra], ignore_index=True)
+
+
+def splice_forecast(item_index: pd.DataFrame, item_fc: pd.DataFrame, origin) -> pd.DataFrame:
+    """Wide monthly panel: actual item index up to `origin`, exp(log_p_hat) for the forecast months after it.
+
+    item_index: wide actual index levels (month x item_id); everything after `origin` is discarded here.
+    item_fc:    long forecasts of ONE origin (target, item_id, log_p_hat), AGENTS.md §4.
+    Items without a forecast have no value after the origin and drop out of those months (D-30).
+    """
+    origin = pd.Timestamp(origin)
+    actual = item_index.loc[:origin]
+    fc = item_fc.assign(target=pd.to_datetime(item_fc.target, format="ISO8601"))
+    fc = fc[fc.target > origin].pivot(index="target", columns="item_id", values="log_p_hat")
+    future = np.exp(fc).reindex(columns=actual.columns)
+    return pd.concat([actual, future]).sort_index().asfreq("MS")
+
+
+def aggregate_groups(items: pd.DataFrame) -> dict[str, list[str]]:
+    """Item lists of every aggregate built in T2.5: total, CPI excl. oil products, ARIMA(6) and ARIMA(14) groups.
+
+    Names: 'total', 'excl_oil', 'agg6:<group>', 'agg14:<group>' (groups as in data/final/items.csv, paper Table 9).
+    """
+    groups = {"total": items.item_id.tolist(),
+              "excl_oil": items.loc[items.special.fillna("") != "oil", "item_id"].tolist()}
+    for level in ("agg6", "agg14"):
+        for g, ids in items.groupby(level)["item_id"]:
+            groups[f"{level}:{g}"] = ids.tolist()
+    return groups
+
+
+def forecast_aggregates(item_index: pd.DataFrame, weights: pd.DataFrame, items: pd.DataFrame,
+                        item_fc: pd.DataFrame, origin) -> pd.DataFrame:
+    """Monthly forecast index of every aggregate for one origin (long: origin, target, aggregate, index_hat).
+
+    Uses only data known at `origin`: actual item indices up to the origin, the item forecasts made at the
+    origin and the weights known at the origin (D-13). The index level is the full-history chain (first link
+    month = 100), so actual and forecast months of the same aggregate are on one scale. Rows cover the whole
+    history up to the last forecast month; months <= origin are actuals (re-aggregated), later ones forecasts.
+    """
+    origin = pd.Timestamp(origin)
+    panel = splice_forecast(item_index, item_fc, origin)
+    w = weights_known_at(weights, origin, panel.index.max().year)
+    out = []
+    for name, ids in aggregate_groups(items).items():
+        s = aggregate_index(panel, w, ids)
+        out.append(pd.DataFrame({"target": s.index, "aggregate": name, "index_hat": s.values}))
+    df = pd.concat(out, ignore_index=True)
+    df.insert(0, "origin", origin)
+    return df
+
+
+def forecast_quarterly_yoy(agg_fc: pd.DataFrame, horizons=range(1, 6)) -> pd.DataFrame:
+    """Quarterly y-o-y inflation forecasts from the monthly aggregate paths of one or more origins.
+
+    h = 1 is the origin's own quarter (its first two months are actual, the third is forecast); target quarter
+    = origin quarter + h - 1. Quarter q-4 of the y-o-y rate is always fully actual for h <= 4 and partly
+    forecast for h = 5 (AGENTS.md §4). Returns origin, origin_q, h, target_q, aggregate, pi_hat.
+    """
+    rows = []
+    for (origin, name), g in agg_fc.groupby(["origin", "aggregate"]):
+        s = g.set_index(pd.DatetimeIndex(g.target))["index_hat"]
+        yoy = quarterly_yoy(s)
+        oq = pd.Timestamp(origin).to_period("Q")
+        for h in horizons:
+            tq = oq + (h - 1)
+            rows.append(dict(origin=origin, origin_q=oq, h=h, target_q=tq, aggregate=name,
+                             pi_hat=yoy.get(tq, np.nan)))
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------------------------------------
+# Benchmark inputs ARIMA(1)/(6)/(14) (T3.2): historical sub-aggregate indices and their weights
+# ---------------------------------------------------------------------------------------------------------
+
+def subaggregate_weights(weights: pd.DataFrame, items: pd.DataFrame, level: str) -> pd.DataFrame:
+    """Annual weight of each sub-aggregate = sum of its items' weights (year, group, weight).
+
+    With these weights, aggregate_index() applied to the sub-aggregate indices reproduces the item aggregate
+    exactly (chained Laspeyres is consistent in aggregation when all are chained at the same link months).
+    """
+    if level == "agg1":
+        grp = pd.Series("total", index=items.item_id)
+    else:
+        grp = items.set_index("item_id")[level]
+    w = weights.assign(group=weights.item_id.map(grp)).dropna(subset=["group"])
+    return w.groupby(["year", "group"], as_index=False)["weight"].sum()
