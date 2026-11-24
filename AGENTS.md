@@ -114,7 +114,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T0.2 | Resolve gaps G1–G13 into initial decisions D-xx | `snb-arima-next-task` | – | done (2026-11-24; D-01…D-17, key ones D-01/02/05/13 confirmed) |
 | **P1** | **Data** | | | |
 | T1.1 | Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year | `snb-arima-data` | T0.1 | done (2026-11-24; 7 bases + GEWICHTUNGEN, loaders in io.py, D-18) |
-| T1.2 | Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts | `snb-arima-data` | T0.1 | todo |
+| T1.2 | Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts | `snb-arima-data` | T0.1 | done (2026-11-24; FRED + 6 SNB cubes, D-19/D-20; consensus = KOF from T0.0) |
 | T1.3 | Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars) | `snb-arima-data` | – | todo |
 | T1.4 | Build consistent item panel (chain-link bases, map items across revisions → ~182 items) | `snb-arima-cpi-panel` | T1.1, T1.3 | todo |
 | T1.5 | Weights by year + collection calendar (official + inferred) | `snb-arima-cpi-panel` | T1.4 | todo |

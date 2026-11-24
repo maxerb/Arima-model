@@ -29,3 +29,17 @@ Every series also has a row in `codebook.csv`.
   BFS gives updated files a new asset id; if a download fails, look up the new id on the page and update `ASSETS` in the script.
 - Vintage: CPI is not revised, so the latest file is real-time data for indices; weights per year are as published.
 - Licence: BFS open data, free use with source attribution ("Quelle: BFS").
+
+## Market data, headline CPI and SNB forecasts (T1.2)
+- Script: `scripts/00_download_market_data.py` (downloads everything below; idempotent). Loaders: `read_fred`,
+  `read_snb_cube` in `src/arima_snb/io.py`. Sanity check: `scripts/explore/check_market_data.py`.
+- **FRED** (public, no key): `https://fred.stlouisfed.org/graph/fredgraph.csv?id=<ID>` for `DCOILBRENTEU` (Brent),
+  `DCOILWTICO` (WTI), `DEXSZUS` (CHF per USD). Daily; latest vintage (these series are not revised in practice).
+- **SNB data portal** API `https://data.snb.ch/api/cube/<cube>/data/csv/en` for `plkopr` (headline CPI),
+  `plkoprinfla` (core), `plkoprex` (CPI excl. groups), `devkum` (monthly FX), `zikrepro` (variable mortgage rate,
+  code `M_MV`), `snbiprogq` (SNB conditional inflation forecasts, every assessment since June 2004 — replaces the
+  hand transcription planned in D-16). Dimension list: `.../api/cube/<cube>/dimensions/en`.
+- **Not downloaded:** BWO hypothekarischer Referenzzinssatz / Durchschnittszinssatz (page
+  https://www.bwo.admin.ch/de/entwicklung-referenzzinssatz-und-durchschnittszinssatz renders its table by JavaScript,
+  no file link). Only needed if D-19 is changed back to the BWO series; then copy the table by hand into `data/meta/`.
+- Licence: FRED data with source attribution; SNB data portal free use with attribution ("Quelle: SNB").

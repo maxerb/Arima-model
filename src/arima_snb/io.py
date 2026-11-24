@@ -26,11 +26,18 @@ def read_snb_cube(path: Path, cube_id: str) -> pd.DataFrame:
     # sep=";" because SNB uses semicolons; the quotes are removed automatically.
     df = pd.read_csv(path, sep=";", skiprows=3)
 
-    # Give the columns our own names
-    df = df.rename(columns={"Date": "date", "D0": "code", "Value": "value"})
+    # Dimension columns D0, D1, ... (one for simple cubes like plkopr, two for devkum/zikrepro/snbiprogq).
+    # Their codes are joined with "_" into one code, e.g. "M0_USD1" (devkum) or "M_MV" (zikrepro).
+    dims = [c for c in df.columns if c.startswith("D") and c[1:].isdigit()]
+    df["code"] = df[dims].astype(str).agg("_".join, axis=1)
+    df = df.rename(columns={"Date": "date", "Value": "value"})
 
-    # "2000-01" -> a real date (2000-01-01). format= says exactly how to read it.
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m")
+    # Monthly cubes: "2000-01" -> 2000-01-01. Quarterly cubes (snbiprogq, T1.2): "2004-Q2" -> first month of
+    # the quarter, 2004-04-01. format= says exactly how to read it.
+    if df["date"].astype(str).str.contains("Q").any():
+        df["date"] = pd.PeriodIndex(df["date"].str.replace("-", ""), freq="Q").start_time
+    else:
+        df["date"] = pd.to_datetime(df["date"], format="%Y-%m")
 
     # New columns, computed for all rows at once
     df["variable"] = cube_id + "_" + df["code"]          # e.g. "snboffzisa_LZ"
@@ -164,3 +171,25 @@ def read_bfs_weights(path: Path) -> pd.DataFrame:
             out.append(pd.DataFrame({"basket": sheet, "pos_no": pos_no[ok].astype(int),
                                      "year": year, "weight": w[ok]}))
     return pd.concat(out, ignore_index=True)
+
+
+# ---------------------------------------------------------------------------
+# FRED daily series (T1.2): crude oil spot prices, USDCHF
+# ---------------------------------------------------------------------------
+# Layout checked 24.11.2026: header "observation_date,<SERIES_ID>", one row per business day,
+# holidays are empty cells (older files used "."), which we drop.
+
+def read_fred(path: Path) -> pd.DataFrame:
+    """Read a FRED fredgraph.csv download into long format with DAILY dates.
+
+    The pipeline averages to months later (oil ECM, D-14); the daily data are kept here because the
+    current-month oil nowcast uses prices from before the BFS collection day (paper p. 7).
+    """
+    df = pd.read_csv(path, na_values=["."])
+    sid = df.columns[1]
+    df = df.rename(columns={"observation_date": "date", sid: "value"})
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df["variable"] = "fred_" + sid
+    df["source"] = "FRED, series " + sid
+    df = df.dropna(subset=["value"])
+    return df[LONG_COLUMNS].reset_index(drop=True)

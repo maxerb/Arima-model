@@ -42,3 +42,9 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - User asked for all decisions in one file; the skill prescribes one note per decision. Improvised `docs/decision_research/best_practice.md` with one section per D-xx. Candidate skill edit: allow a "batch mode" writing one combined file.
 - Many official PDFs failed for automated fetching (BFS image-only PDFs, IMF 404, StatCan/BoC/Harvard 403). Saved PDFs could be read page-by-page with the Read tool (worked for ECB WP 247 and SNB press release). Candidate skill edit: "if web-fetch gets an unreadable PDF, read the saved copy with Read(pages=…)"; list unreachable sources in a table instead of dropping them.
 - Local data check (KOF consensus) changed a decision (D-06 refine) — step 5 of the skill proved useful.
+
+### Micro retro T1.2 (2026-11-24) — snb-arima-data
+- Skill says SNB conditional forecasts must be hand-collected; they exist as SNB cube `snbiprogq`. Candidate edit: name the cube in the datasets table.
+- Skill suggests BWO for mortgage rates after 2008; BWO page is JS-only (no file). SNB `zikrepro` `M_MV` covers 1976–today. Candidate edit: list `zikrepro` first.
+- `read_snb_cube` only handled one dimension and monthly dates; extended for D0/D1 and quarterly cubes (no skill change needed).
+- Scripts need the project venv (`.venv/Scripts/python`); plain `python` lacked the package. Candidate edit: mention in next-task skill.
