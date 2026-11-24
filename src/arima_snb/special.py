@@ -11,7 +11,8 @@ import numpy as np
 import pandas as pd
 
 from arima_snb.config import (FORECAST_STEPS, OIL_CRUDE_SERIES, OIL_FIRST_DAYS, OIL_FX_SERIES, OIL_K_MAX,
-                              OIL_M_MAX, OIL_SAMPLE_START, OIL_WINDOW_DAYS, OIL_X_RULE)
+                              OIL_M_MAX, OIL_SAMPLE_START, OIL_WINDOW_DAYS, OIL_X_RULE, RENT_COLLECTION_MONTHS,
+                              RENT_MORTGAGE_LAG, RENT_MORTGAGE_SERIES, RENT_P_MAX, RENT_SAMPLE_START)
 
 
 # ===========================================================================
@@ -187,6 +188,141 @@ def forecast_oil_item(log_p: pd.Series, crude_chf_daily: pd.Series, origin, step
 # B. RENTS - quarterly ARIMA with asymmetric mortgage-rate effect (T2.4, paper pp. 7-8)
 # ===========================================================================
 
-def forecast_rent(log_rent: pd.Series, mortgage_rate: pd.Series, origin: pd.Timestamp, steps: int) -> pd.DataFrame:
-    """Quarterly rent model with lagged positive/negative mortgage-rate changes (paper pp. 7-8)."""
-    raise NotImplementedError("T2.4")
+# Rents (weight ≈ 20 %) are collected once a quarter, in Feb/May/Aug/Nov (true in the data since 1993, D-48).
+# The paper models them as a quarterly AR in first differences plus the 4th lag of the change in the mortgage
+# rate, entered separately for increases and decreases (p. 7):
+#
+#   Δr_q = c + Σ_{j=1..p} φ_j Δr_{q-j} + β⁺ Δm⁺_{q-4} + β⁻ Δm⁻_{q-4} + e_q
+#
+# r_q = log rent index in the collection month of quarter q, m_q = quarterly average mortgage rate in percent
+# (D-15 rev.), Δm⁺ = max(Δm, 0), Δm⁻ = min(Δm, 0). Swiss tenancy law lets landlords pass on mortgage-rate
+# increases (and obliges them, on request, to pass on decreases) with a delay, and in practice increases pass
+# through faster/more fully - hence two coefficients. p by SIC (D-48), estimated by OLS.
+#
+# Forecast: the mortgage rate stays constant at its last known value (paper p. 7) -> future Δm = 0, but the
+# known changes of the last 4 quarters still enter through the lag. At an origin in the 2nd month of a quarter
+# the current quarter's rent is already observed, so the h = 1 rent error is zero by construction (Table 3).
+# Information set (paper p. 12): mortgage data up to the first day of the last month of the quarter = monthly
+# values up to the origin month.
+
+RENT_MODEL_NAME = "rent_mortgage"
+
+
+def load_mortgage_rate() -> pd.Series:
+    """Monthly SNB mean variable mortgage rate in percent (zikrepro M_MV, D-19)."""
+    from arima_snb import io   # local import: keeps the model code free of file access
+
+    m = io.read_snb_cube(io.find_raw("snb-data-zikrepro-*.csv"), "zikrepro")
+    return m[m.variable == RENT_MORTGAGE_SERIES].set_index("date")["value"].sort_index().rename("mortgage")
+
+
+def quarterly_mortgage(monthly: pd.Series, last_quarter) -> pd.Series:
+    """Quarterly average mortgage rate (D-15 rev.), indexed by quarter, up to `last_quarter`.
+
+    `monthly` must already be cut at the information set. Months after its last value are filled with that last
+    value (rate constant over the horizon, paper p. 7) before averaging, so a partly known quarter is the
+    average of its known months and the last known rate.
+    """
+    end = pd.Period(last_quarter, freq="Q").end_time.normalize().replace(day=1)
+    months = pd.date_range(monthly.index[0], end, freq="MS")
+    filled = monthly.reindex(months).ffill()
+    return filled.groupby(filled.index.to_period("Q")).mean()
+
+
+def rent_quarterly_changes(log_rent: pd.Series, anchor: pd.Timestamp) -> pd.Series:
+    """Quarterly log changes of the rent index between collection months, ending at `anchor`, indexed by quarter."""
+    x = log_rent.loc[:anchor]
+    xq = x[[((anchor.year - d.year) * 12 + anchor.month - d.month) % 3 == 0 for d in x.index]]
+    dr = xq.diff().dropna()
+    dr.index = dr.index.to_period("Q")
+    return dr
+
+
+def _rent_design(dr: np.ndarray, dpos: np.ndarray, dneg: np.ndarray, p: int, start: int):
+    """Regressors for rows start..T-1: [1, Δr_{q-1}..Δr_{q-p}, Δm⁺_{q-L}, Δm⁻_{q-L}] with L = RENT_MORTGAGE_LAG.
+
+    dpos/dneg are aligned with dr (same quarters) and already lagged by L.
+    """
+    T = len(dr)
+    cols = [np.ones(T - start)] + [dr[start - j:T - j] for j in range(1, p + 1)] + [dpos[start:], dneg[start:]]
+    return np.column_stack(cols), dr[start:]
+
+
+def mortgage_changes(m_q: pd.Series) -> tuple[pd.Series, pd.Series]:
+    """Positive and negative parts of the quarterly mortgage-rate change, lagged RENT_MORTGAGE_LAG quarters."""
+    dm = m_q.diff()
+    return dm.clip(lower=0).shift(RENT_MORTGAGE_LAG), dm.clip(upper=0).shift(RENT_MORTGAGE_LAG)
+
+
+def fit_rent_model(dr: pd.Series, m_q: pd.Series) -> dict:
+    """OLS of Δr_q on its own lags (p = 0..RENT_P_MAX by SIC, common sample) and lagged Δm⁺, Δm⁻ (paper p. 7)."""
+    from arima_snb.item_models import sic   # same Schwarz criterion as the item ARIMAs (eq. 3)
+
+    dpos, dneg = mortgage_changes(m_q)
+    df = pd.concat([dr.rename("dr"), dpos.rename("pos"), dneg.rename("neg")], axis=1).loc[dr.index].dropna()
+    y, pos, neg = df.dr.to_numpy(), df.pos.to_numpy(), df.neg.to_numpy()
+    start = RENT_P_MAX   # all candidates are compared on the same rows (AGENTS.md §7)
+    best = None
+    for p in range(RENT_P_MAX + 1):
+        X, yy = _rent_design(y, pos, neg, p, start)
+        f = _ols(yy, X)
+        f.update(p=p, sic=sic(f["sse"], f["n"], X.shape[1]))
+        if best is None or f["sic"] < best["sic"]:
+            best = f
+    names = ["c"] + [f"phi_{j}" for j in range(1, best["p"] + 1)] + ["beta_pos", "beta_neg"]
+    return {"p": best["p"], "sic": best["sic"], "params": dict(zip(names, best["beta"])),
+            "se": dict(zip(names, best["se"])), "t_eff": best["n"],
+            "sample_start": df.index[start], "sample_end": df.index[-1]}
+
+
+def rent_path(fit: dict, dr_hist: np.ndarray, dpos_future: np.ndarray, dneg_future: np.ndarray) -> np.ndarray:
+    """Iterate the rent equation forward: future quarterly log changes given known history and Δm± (lagged)."""
+    par, p = fit["params"], fit["p"]
+    hist = list(dr_hist)
+    out = []
+    for pos, neg in zip(dpos_future, dneg_future):
+        d = par["c"] + sum(par[f"phi_{j}"] * hist[-j] for j in range(1, p + 1)) \
+            + par["beta_pos"] * pos + par["beta_neg"] * neg
+        hist.append(d)
+        out.append(d)
+    return np.array(out)
+
+
+def forecast_rent(log_rent: pd.Series, mortgage_monthly: pd.Series, origin, steps: int = FORECAST_STEPS
+                  ) -> tuple[pd.DataFrame, dict]:
+    """Rent-model forecast of the rent item's log price for the `steps` months after `origin` (paper p. 7).
+
+    log_rent:          monthly log rent index (may extend past the origin; cut here).
+    mortgage_monthly:  monthly mortgage rate in percent (may extend past the cut-off; cut here, paper p. 12).
+    The quarterly changes are booked in the future collection months anchor+3, anchor+6, ...; the level is
+    carried forward in between, like the published index (D-36). Returns (target, log_p_hat) and a log dict.
+    """
+    origin = pd.Timestamp(origin)
+    targets = pd.date_range(origin + pd.DateOffset(months=1), periods=steps, freq="MS")
+    x = log_rent.loc[pd.Timestamp(RENT_SAMPLE_START):origin].dropna()
+    log = {"spec_method": "rent", "method": "rent", "p": np.nan, "q": np.nan, "seasonal": False, "sic": np.nan,
+           "t_eff": np.nan, "p_max_eff": RENT_P_MAX, "n_candidates": RENT_P_MAX + 1, "n_failed": 0,
+           "quarterly": True, "note": ""}
+    if x.empty or x.index[-1] != origin:
+        log.update(method="none", note="no observation at origin")
+        return pd.DataFrame(columns=["target", "log_p_hat"]), log
+
+    # latest collection month <= origin (Feb/May/Aug/Nov)
+    anchor = next(origin - pd.DateOffset(months=k) for k in range(3)
+                  if (origin - pd.DateOffset(months=k)).month in RENT_COLLECTION_MONTHS)
+    dr = rent_quarterly_changes(x, anchor)
+    n_q = int(np.ceil((steps + 2) / 3)) + 1
+    last_q = anchor.to_period("Q") + n_q
+    m = mortgage_monthly[mortgage_monthly.index < crude_info_cutoff(origin)].dropna()   # paper p. 12
+    m_q = quarterly_mortgage(m, last_q)
+    fit = fit_rent_model(dr, m_q.loc[:anchor.to_period("Q")])
+    dpos, dneg = mortgage_changes(m_q)
+    fut_q = pd.period_range(anchor.to_period("Q") + 1, periods=n_q, freq="Q")
+    dq = rent_path(fit, dr.to_numpy(), dpos.loc[fut_q].to_numpy(), dneg.loc[fut_q].to_numpy())
+    coll_months = [anchor + pd.DateOffset(months=3 * (k + 1)) for k in range(n_q)]
+    path = np.array([x.iloc[-1] + dq[[c <= t for c in coll_months]].sum() for t in targets])
+    par, se = fit["params"], fit["se"]
+    log.update(p=fit["p"], sic=fit["sic"], t_eff=fit["t_eff"],
+               note=f"rent p={fit['p']} b+={par['beta_pos']:.4f}({se['beta_pos']:.4f}) "
+                    f"b-={par['beta_neg']:.4f}({se['beta_neg']:.4f})")
+    return pd.DataFrame({"target": targets, "log_p_hat": path}), log

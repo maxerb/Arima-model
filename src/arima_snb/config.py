@@ -69,6 +69,15 @@ OIL_K_MAX = 3                      # D-14: Δx lags 0..3, chosen by SIC
 OIL_M_MAX = 3                      # D-14: Δp lags 0..3, chosen by SIC
 
 # ---------------------------------------------------------------------------
+# Rent model (T2.4, paper p. 7, decisions D-15 rev., D-19, D-48)
+# ---------------------------------------------------------------------------
+RENT_MORTGAGE_SERIES = "zikrepro_M_MV"  # D-19: SNB mean variable mortgage rate, monthly, percent
+RENT_SAMPLE_START = "1993-05"      # D-48: linked rent series from the 1993 basket (user choice 2026-11-24)
+RENT_COLLECTION_MONTHS = (2, 5, 8, 11)  # rents collected Feb/May/Aug/Nov; holds in the data since 1993 (D-48)
+RENT_MORTGAGE_LAG = 4              # paper p. 7: 4th lag of the quarterly change in the mortgage rate
+RENT_P_MAX = 4                     # D-48: AR order p = 0..4 (quarters) by SIC on a common sample
+
+# ---------------------------------------------------------------------------
 # Collection frequency (paper fn. 9)
 # ---------------------------------------------------------------------------
 NO_COLLECTION_TOL = 1e-3           # |log change| below this counts as "not collected"

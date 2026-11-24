@@ -268,7 +268,8 @@ def quarterly_series(log_p: pd.Series, anchor: pd.Timestamp) -> pd.Series:
 # ---------------------------------------------------------------------------
 def forecast_item(log_p: pd.Series, spec: pd.Series, origin, steps: int = FORECAST_STEPS,
                   pattern: list[int] | None = None,
-                  crude_chf_daily: pd.Series | None = None) -> tuple[pd.DataFrame, dict]:
+                  crude_chf_daily: pd.Series | None = None,
+                  mortgage_rate: pd.Series | None = None) -> tuple[pd.DataFrame, dict]:
     """Forecast one item's log price for the `steps` months after `origin`, using data up to `origin` only.
 
     `spec` = the item's row of item_specs.csv valid at `origin` (`diagnostics.specs_for_origin`, D-31).
@@ -276,12 +277,17 @@ def forecast_item(log_p: pd.Series, spec: pd.Series, origin, steps: int = FORECA
     quarterly items. Returns the forecast (target, log_p_hat) and a log dict (method, order, SIC, notes).
     Oil (`ecm`) items use the error-correction model of `special.forecast_oil_item` (T2.3) when the daily
     crude price in CHF is passed as `crude_chf_daily`; without it they get a plain ARIMA, which is the
-    "Oil products (ARIMA)" benchmark of paper Table 3. Rent (`rent`) items get a plain ARIMA until T2.4.
+    "Oil products (ARIMA)" benchmark of paper Table 3. Rent (`rent`) items use the rent model of
+    `special.forecast_rent` (T2.4) when the monthly mortgage rate is passed as `mortgage_rate`; without it they
+    get a plain quarterly ARIMA, the "Rents (ARIMA)" benchmark of Table 3.
     """
     origin = pd.Timestamp(origin)
     if spec["method"] == "ecm" and crude_chf_daily is not None:
         from arima_snb.special import forecast_oil_item   # T2.3: cuts prices and crude at the origin itself
         return forecast_oil_item(log_p, crude_chf_daily, origin, steps)
+    if spec["method"] == "rent" and mortgage_rate is not None:
+        from arima_snb.special import forecast_rent   # T2.4: cuts rents and mortgage rate at the origin itself
+        return forecast_rent(log_p, mortgage_rate, origin, steps)
     x = log_p.loc[pd.Timestamp(ITEM_SAMPLE_START):origin].dropna()   # paper sample from May 2000 (p. 5)
     targets = pd.date_range(origin + pd.DateOffset(months=1), periods=steps, freq="MS")
     log = {"spec_method": spec["method"], "method": spec["method"], "p": np.nan, "q": np.nan,
@@ -339,20 +345,23 @@ def forecast_item(log_p: pd.Series, spec: pd.Series, origin, steps: int = FORECA
 # ---------------------------------------------------------------------------
 def _forecast_one(args):
     """Worker for one item (top-level so that it can run in a separate process)."""
-    item_id, x, spec, origin, steps, pattern, crude = args
-    f, lg = forecast_item(x, spec, origin, steps, pattern, crude)
+    item_id, x, spec, origin, steps, pattern, crude, mortgage = args
+    f, lg = forecast_item(x, spec, origin, steps, pattern, crude, mortgage)
     f.insert(0, "item_id", item_id)
     return f, {"item_id": item_id, **lg}
 
 
 def forecast_items(panel: pd.DataFrame, specs: pd.DataFrame, collection: pd.DataFrame, origin,
                    steps: int = FORECAST_STEPS, n_jobs: int = ITEM_N_JOBS,
-                   crude_chf_daily: pd.Series | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+                   crude_chf_daily: pd.Series | None = None,
+                   mortgage_rate: pd.Series | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Forecast every item of `specs` (the vintage valid at `origin`) and return (forecasts, order log).
 
     crude_chf_daily: daily crude price in CHF (`special.load_crude_chf_daily()`); given -> oil items use the
     ECM (T2.3), None -> plain ARIMA for oil items (Table 3 benchmark). It is cut at the paper's p. 12
     information cut-off inside the oil model, and here already at that cut-off for safety.
+    mortgage_rate: monthly mortgage rate (`special.load_mortgage_rate()`); given -> the rent item uses the rent
+    model (T2.4), None -> plain ARIMA (Table 3 benchmark). Cut at the same p. 12 cut-off.
 
     forecasts follow AGENTS.md §4: origin, target, item_id, model, log_p_hat. The log has one row per item.
     Items are independent, so they run in `n_jobs` parallel processes (1 = sequential).
@@ -366,6 +375,9 @@ def forecast_items(panel: pd.DataFrame, specs: pd.DataFrame, collection: pd.Data
     if crude_chf_daily is not None:
         from arima_snb.special import crude_info_cutoff
         crude_chf_daily = crude_chf_daily[crude_chf_daily.index < crude_info_cutoff(origin)]
+    if mortgage_rate is not None:
+        from arima_snb.special import crude_info_cutoff
+        mortgage_rate = mortgage_rate[mortgage_rate.index < crude_info_cutoff(origin)]
     jobs, logs = [], []
     for spec in specs.itertuples(index=False):
         spec = pd.Series(spec._asdict())
@@ -374,7 +386,8 @@ def forecast_items(panel: pd.DataFrame, specs: pd.DataFrame, collection: pd.Data
             continue
         pattern = collection_pattern(coll, spec.item_id, origin)
         crude = crude_chf_daily if spec.method == "ecm" else None
-        jobs.append((spec.item_id, wide[spec.item_id], spec, origin, steps, pattern, crude))
+        mortgage = mortgage_rate if spec.method == "rent" else None
+        jobs.append((spec.item_id, wide[spec.item_id], spec, origin, steps, pattern, crude, mortgage))
     if n_jobs > 1:
         with ProcessPoolExecutor(max_workers=n_jobs) as pool:
             results = list(pool.map(_forecast_one, jobs, chunksize=4))
