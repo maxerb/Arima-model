@@ -15,3 +15,17 @@ Every series also has a row in `codebook.csv`.
 ## Removed
 - SNB cubes `zimoma` (money market rates) and `snboffzisa` (official rates), imported in T0.0, were deleted on
   2026-11-24: not used by the model. The SNB loader `read_snb_cube` in `io.py` stays for the mortgage-rate and FX cubes (T1.2).
+
+## BFS/SFSO consumer price index (LIK): item indices and weights (T1.1)
+- Script: `scripts/00_download_bfs_cpi.py` (downloads all files below; skips files already present). Loaders:
+  `read_bfs_cpi_items` and `read_bfs_weights` in `src/arima_snb/io.py`. Check: `scripts/explore/check_bfs_cpi_loaders.py`.
+- Provider: Bundesamt für Statistik (BFS), page "Detailresultate":
+  https://www.bfs.admin.ch/bfs/de/home/statistiken/preise/landesindex-konsumentenpreise/detailresultate.html
+  and "Warenkorb und Gewichtung": https://www.bfs.admin.ch/bfs/de/home/statistiken/preise/erhebungen/lik/warenkorb.html
+- Files (downloaded 2026-11-24, saved as `<code>_<asset>_<date>.<ext>`): one "Detailresultate" file per basket,
+  LIK93B93 (May 1993–May 2000), LIK00B00 (May 2000–Dec 2005), LIK05B05 (Dec 2005–Dec 2010), LIK10B10 (May 2000–Dec 2015),
+  LIK15B15, LIK20B20, LIK25B25 (back-cast to Dec 1982, latest month Oct 2026), and `GEWICHTUNGEN` (weights per basket and year).
+- Manual route: on the pages above, click the file with the code in square brackets (e.g. `[LIK10B10]`) → "Download".
+  BFS gives updated files a new asset id; if a download fails, look up the new id on the page and update `ASSETS` in the script.
+- Vintage: CPI is not revised, so the latest file is real-time data for indices; weights per year are as published.
+- Licence: BFS open data, free use with source attribution ("Quelle: BFS").

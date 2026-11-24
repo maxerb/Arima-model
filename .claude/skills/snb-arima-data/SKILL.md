@@ -18,7 +18,7 @@ description: Find, download and document the raw data for the SNB disaggregate-A
 | Need | Provider | Notes |
 |---|---|---|
 | CPI item indices (all positions, monthly) | BFS/SFSO — "Landesindex der Konsumentenpreise (LIK)", detailed results / historical index values per base | One file per base (May 2000=100, Dec 2005=100, Dec 2010=100, Dec 2015=100, Dec 2020=100, newer). Need the **lowest published level** (Positionen/expenditure items). Also look on opendata.swiss. |
-| CPI weights | BFS — "LIK Gewichtung" per year | Annual weights per position; check from which year annual updating starts. |
+| CPI weights | BFS — file `[GEWICHTUNGEN]` on the "Warenkorb und Gewichtung" page | One sheet per basket, one column per weight year (annual since 2000/01). The detail files of 2015+ carry only their latest weight year. |
 | Headline CPI and core | BFS or SNB data portal | Needed as the evaluation target (official inflation). |
 | Collection calendars | Paper App. A (Tables 5–8) + BFS methodology docs ("Methodenübersicht") | For years after 2011, infer from data (see `snb-arima-cpi-panel`). |
 | Crude oil spot (daily) | e.g. FRED `DCOILBRENTEU` (Brent) / `DCOILWTICO` (WTI) | Paper says "crude oil spot price" — log choice (D-xx). |
@@ -46,4 +46,6 @@ description: Find, download and document the raw data for the SNB disaggregate-A
 ## Pitfalls
 - BFS XLSX files have multi-row headers, German/French labels, and footnote rows — parse by position *and* assert labels.
 - Index levels in different bases are not comparable — never concatenate bases without chain-linking (next skill).
+- Bases 1993–2010 are `.xls` (needs `xlrd`). Position numbers repeat below the main hierarchy (BFS special
+  groupings) — keep the first occurrence. Index levels > 1000 are real for PCs/TVs back-cast to the 1980s.
 - Do not put personal data or credentials into requests; public sources need no login.

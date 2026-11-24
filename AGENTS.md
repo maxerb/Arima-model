@@ -113,7 +113,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T0.1 | Create package skeleton, `config.py`, `run_all.py`, pytest setup | `snb-arima-next-task` | T0.0 | done (2026-11-24; 16 tests pass, modules are stubs) |
 | T0.2 | Resolve gaps G1–G13 into initial decisions D-xx | `snb-arima-next-task` | – | done (2026-11-24; D-01…D-17, key ones D-01/02/05/13 confirmed) |
 | **P1** | **Data** | | | |
-| T1.1 | Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year | `snb-arima-data` | T0.1 | todo |
+| T1.1 | Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year | `snb-arima-data` | T0.1 | done (2026-11-24; 7 bases + GEWICHTUNGEN, loaders in io.py, D-18) |
 | T1.2 | Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts | `snb-arima-data` | T0.1 | todo |
 | T1.3 | Transcribe paper Table 9 (182 items, 2010 weights) and Tables 5–8 (collection calendars) | `snb-arima-data` | – | todo |
 | T1.4 | Build consistent item panel (chain-link bases, map items across revisions → ~182 items) | `snb-arima-cpi-panel` | T1.1, T1.3 | todo |
@@ -155,6 +155,7 @@ Parallelisable: T1.2/T1.3 with T1.1; T2.3/T2.4 with T2.5; T4.1 once T2.1 is done
 | `snb-arima-evaluation` | Pseudo-OOS loop, benchmarks, RMSFE, DMW-HLN, replication tables |
 | `snb-arima-kalman-extension` | Time-varying collection frequency via Kalman filter with missing data |
 | `snb-arima-report` | Thesis tables/figures, paper-vs-ours comparison, methods write-up |
+| `snb-arima-decision-research` | Research best practice for one decision D-xx / gap G-x with opened sources → `docs/decision_research/` |
 | `skill-feedback-loop` | Improve the skills themselves: micro retro after every task, macro retro after every phase (§10) |
 
 ## 7. Domain knowledge agents tend to get wrong
