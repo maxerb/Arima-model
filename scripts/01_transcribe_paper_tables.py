@@ -56,7 +56,7 @@ def table9_lines(reader) -> list[str]:
     out, carry = [], ""
     for raw in text.splitlines():
         line = raw.replace("ﬁ", "fi").replace("mainte -", "mainte-").strip()
-        if not line or line.startswith(("Model Sub-aggregates", "Table 9 continued")) or line.isdigit():
+        if not line or line.startswith(("Model Sub-aggregates", "Table 9 continued", "Table 8 continued")) or line.isdigit():
             continue
         line = (carry + " " + line).strip() if carry else line
         if NUM.match(line) or re.fullmatch(r"\d+\.\d{3}", line):

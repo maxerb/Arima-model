@@ -54,3 +54,11 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - Skill implies Table 9 gives `agg6, agg14` per item; it does not (only sub-aggregate totals). agg14 derived from item order, agg6 deferred to T1.4 (D-21). Candidate edit: say so in step 5.
 - Skill says PDF pp. 21-25 for Table 9; those are printed page numbers (PDF pages 23-27). Calendars are PDF pp. 19-23. Candidate edit: give both.
 - Improvised: the calendar 'x' marks have no column position in the text layer; rendered pages to PNG and transcribed visually, then cross-checked mark counts against the text layer. Candidate edit: describe this method.
+
+### Micro retro T1.4 (2026-11-24) — snb-arima-cpi-panel
+- Skill assumes the item list comes from Table 9 names; matching works only via weights, and the weights are those of the **2005 basket for 2010** (not the 2010 basket). Candidate edit: step 1 "match Table 9 by LIK2005 weights of 2010, then by order".
+- Skill check "no jump > 20 % at a link month" cannot detect wrong links (ratio-linking never creates a level jump; seasonal items jump anyway). Improvised a better check: compare linked monthly changes with BFS back-casts in newer files. Candidate edit: replace the check.
+- Skill does not mention that the 1993 and 2025 baskets use different position numbers, and that names repeat (retail vs restaurant wine/beer). Improvised name + dynamics rule (D-25). Candidate edit: add pitfall.
+- D-21 plan (agg6 from BFS special groupings) does not work: groupings are aggregate series without membership lists. Candidate edit to snb-arima-data/cpi-panel once a source is found.
+- Transcription bug from T1.3 fixed (item 9 "Table 8 continued Beef" -> "Beef"; page header was not skipped).
+

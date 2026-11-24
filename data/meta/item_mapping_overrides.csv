@@ -1,0 +1,57 @@
+item_no,base,pos_nos,note
+74,LIK05B05,3074,"Skirts (Women) = Jupes; Table 9 weight 0.230 differs from BFS 0.143, matched by name"
+93,LIK05B05,3237,"Shoe repairs = Reparatur von Schuhen; Table 9 weight 0.241 differs from BFS 0.022, matched by name"
+124,LIK05B05,6070,"Table 9 health names are shifted against the weights; weight 0.046 = Sanitaetsmaterial (6070), the only health position left"
+16,LIK00B00,1155;1169,2000 basket splits Fleischwaren and Zubereitetes Fleisch; merged with weights
+22,LIK00B00,1213;1221,2000 basket splits Hartkaese and Halbhartkaese; merged
+51,LIK00B00,1519;1526,2000 basket splits Bohnenkaffee and Loeslicher Kaffee; merged
+57,LIK00B00,2003,Branntweine = Braende (renamed)
+133,LIK00B00,7210,Eisenbahn = Oeffentlicher Verkehr: direkter Verkehr (renamed; weight 1.090 vs 1.014)
+155,LIK00B00,9475,Sonstige Dienstleistungen (Freizeit) = Fotolabor in 2005 (same number; weight 0.130 vs 0.112)
+156,LIK00B00,9490,Hobby-Kurse = Freizeitkurse (renamed)
+180,LIK00B00,12130;12150,2000 basket splits non-electric and electric personal care appliances; merged
+29,LIK10B10,1308,Zitrusfruechte = Agrumen (renamed)
+96,LIK10B10,4010,Material fuer Wohnungsunterhalt (renamed)
+102,LIK10B10,5003,Wohnzimmermoebel = Wohnen (renamed)
+143,LIK10B10,9085,Speichermedien und Inhalte = Aufzeichnungsmedien (renamed)
+150,LIK10B10,9400,Sporteinrichtungen; same number and weight (0.481 vs 0.500); 9351 is the parent incl. ski lifts
+182,LIK10B10,12170,Reiseartikel und Accessoires = Sonstige persoenliche Gebrauchsgegenstaende (same number); 12160 is the parent incl. watches
+24,LIK15B15,1246;1247,2015 splits Joghurt from Andere Milcherzeugnisse; merged
+29,LIK15B15,1308,Zitrusfruechte
+34,LIK15B15,1347;1352;1358,Konservierte Fruechte split into dried / tinned / frozen; merged
+49,LIK15B15,1478;1486;1491,Suppen Gewuerze Saucen split into three; merged
+53,LIK15B15,1539,Kakao und Schokoladenpulver (renamed)
+67,LIK15B15,3004,"Jacken, Herren (coats, jackets and vestons in 2005)"
+76,LIK15B15,3061,"2015 merges women's coats and jackets: items 73 and 76 share 3061 from 2016"
+80,LIK15B15,3126,"Jacken, Kinder"
+102,LIK15B15,5003,Wohnzimmer- und Bueromoebel
+104,LIK15B15,5031;5040,Kitchen/dining and garden furniture; merged
+112,LIK15B15,5150;5165,Glaswaren und Geschirr + Besteck; merged
+141,LIK15B15,9048,Personalcomputer
+143,LIK15B15,9085,Speichermedien und Inhalte
+150,LIK15B15,9400,Eintritte in Sporteinrichtungen; 9399 is the parent incl. ski lifts
+158,LIK15B15,9526,Einzelausgaben von Zeitungen und Zeitschriften
+169,LIK15B15,none,No counterpart for other non-alcoholic drinks in restaurants after 2015; item ends Dec 2015
+180,LIK15B15,12130;12150,Personal care appliances split non-electric / electric; merged
+182,LIK15B15,12170,Reiseartikel und Accessoires
+24,LIK20B20,1246;1247,as 2015
+29,LIK20B20,1308,as 2015
+33,LIK20B20,1338,"Melonen und Trauben (same number as Andere Fruechte; exotic fruit and berries already separate since 2015)"
+34,LIK20B20,1347;1352;1358,as 2015
+49,LIK20B20,1478;1486;1491,as 2015
+53,LIK20B20,1539,as 2015
+67,LIK20B20,3004,as 2015
+76,LIK20B20,3061,as 2015
+80,LIK20B20,3126,as 2015
+85,LIK20B20,none,Kleiderstoffe dropped from the 2020 basket; item ends Dec 2020
+86,LIK20B20,none,Mercerie und Strickwolle dropped from the 2020 basket; item ends Dec 2020
+102,LIK20B20,5003,as 2015
+104,LIK20B20,5031;5040,as 2015
+112,LIK20B20,5150;5165,as 2015
+141,LIK20B20,9048,as 2015
+143,LIK20B20,9085,as 2015
+150,LIK20B20,9400,as 2015
+158,LIK20B20,9526,as 2015
+169,LIK20B20,none,as 2015
+180,LIK20B20,12130;12150,as 2015
+182,LIK20B20,12170,as 2015
