@@ -30,3 +30,7 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 | skill-feedback-loop | 0 | 0 | 0 | – |
 
 ## Ideas (not evidence yet; do not apply)
+
+### Micro retro T0.2 (2026-11-24) — snb-arima-next-task
+- Finding: skill lists G4 among the "important" gaps to confirm, but the ask tool fits 4 questions; G4 (origins) was left `proposed` since it follows directly from the paper. No skill edit needed.
+- Added `tests/test_decisions.py` as the T0.2 check (skill did not name one) — candidate addition to the skill's T0.2 section.

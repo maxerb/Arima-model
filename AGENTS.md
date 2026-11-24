@@ -111,7 +111,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | **P0** | **Foundations** | | | |
 | T0.0 | Make the repo standalone: `git init`, copy in raw files, codebook, requirements (as UTF-8) and the SNB loader | `snb-arima-next-task` | – | done (2026-11-24; KOF files kept out of git until licence checked) |
 | T0.1 | Create package skeleton, `config.py`, `run_all.py`, pytest setup | `snb-arima-next-task` | T0.0 | done (2026-11-24; 16 tests pass, modules are stubs) |
-| T0.2 | Resolve gaps G1–G13 into initial decisions D-xx | `snb-arima-next-task` | – | todo |
+| T0.2 | Resolve gaps G1–G13 into initial decisions D-xx | `snb-arima-next-task` | – | done (2026-11-24; D-01…D-17, key ones D-01/02/05/13 confirmed) |
 | **P1** | **Data** | | | |
 | T1.1 | Download BFS/SFSO item-level CPI indices (all bases since 1993) + weights per year | `snb-arima-data` | T0.1 | todo |
 | T1.2 | Download headline CPI, crude oil (Brent/WTI), USDCHF, mortgage rates, consensus, SNB conditional forecasts | `snb-arima-data` | T0.1 | todo |
