@@ -18,7 +18,7 @@ reasoning or the paper itself.
 | D-03 | Recursive window, re-select order each origin | as is | **keep** | ●●● |
 | D-04 | 32 origins Feb/May/Aug/Nov 2004–2011 | as is | **keep** (matches the SNB's quarterly meeting dates) | ●●● |
 | D-05 | AR(1) on monthly Δlog CPI | as is | **keep**; add random walk with drift as an extra benchmark | ●●○ |
-| D-06 | KOF Consensus instead of Consensus Economics | as is | **refine**: KOF has only annual forecasts (current and next year) | ●●● (own data check) |
+| D-06 | KOF Consensus instead of Consensus Economics | annual-average target | **adopted (confirmed 2026-11-24)**: KOF has only annual forecasts (current and next year) | ●●● (own data check) |
 | D-07 | No add-factors in pseudo-OOS | as is | **keep** (paper p. 12) | ●○○ |
 | D-08 | Raw data not in git | as is | n/a (repo housekeeping) | – |
 | D-09 | ≥ 36 monthly obs for an ARIMA | as is | **keep**; FPP's auto.arima caps orders at n/3 for short series | ●○○ |

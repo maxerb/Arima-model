@@ -48,3 +48,4 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 - Skill suggests BWO for mortgage rates after 2008; BWO page is JS-only (no file). SNB `zikrepro` `M_MV` covers 1976–today. Candidate edit: list `zikrepro` first.
 - `read_snb_cube` only handled one dimension and monthly dates; extended for D0/D1 and quarterly cubes (no skill change needed).
 - Scripts need the project venv (`.venv/Scripts/python`); plain `python` lacked the package. Candidate edit: mention in next-task skill.
+- 2026-11-24: user confirmed D-06 revision (KOF evaluated on annual-average inflation, cy/ny). Pending skill edit (needs approval): `snb-arima-evaluation` consensus row should say "annual-average target per D-06 rev." instead of the open "convert … only if defensible".
