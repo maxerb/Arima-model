@@ -122,7 +122,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | **P2** | **Item models** | | | |
 | T2.1 | Unit-root, seasonality, collection-frequency diagnostics → `item_specs.csv` | `snb-arima-item-diagnostics` | T1.5 | done (2026-11-24; annual spec vintages 2003–2025, d=1 for all, D-31…D-34) |
 | T2.2 | Per-item ARIMA with SIC selection + ad-hoc fallbacks, single-origin forecast | `snb-arima-item-models` | T2.1 | done (2026-11-24; CLS + SIC, quarterly-sampled items, grid guard, D-35…D-37; ~2.5–4 min/origin) |
-| T2.3 | Oil-products ECM | `snb-arima-oil-rent` | T1.2, T2.2 | todo |
+| T2.3 | Oil-products ECM | `snb-arima-oil-rent` | T1.2, T2.2 | done (2026-11-24; Brent×USDCHF last-10-day x_t, EG two-step, sample 1993, D-14 rev., D-38, D-39; oil RMSFE ≈ paper Table 3) |
 | T2.4 | Rent model with asymmetric mortgage-rate effect | `snb-arima-oil-rent` | T1.2, T2.2 | todo |
 | T2.5 | Aggregation to CPI, ARIMA(6), ARIMA(14), core; quarterly y-o-y | `snb-arima-aggregate` | T2.2 | todo |
 | **P3** | **Replication of the evaluation** | | | |

@@ -57,6 +57,18 @@ PLAUSIBLE_PCTL = (1, 99)           # D-11: 12-month forecast change outside thes
 ITEM_N_JOBS = 4                    # parallel worker processes for the item models (T2.2)
 
 # ---------------------------------------------------------------------------
+# Oil-products ECM (T2.3, paper p. 7, decision D-14 rev.)
+# ---------------------------------------------------------------------------
+OIL_CRUDE_SERIES = "DCOILBRENTEU"  # D-14: Brent spot (FRED); WTI = robustness
+OIL_FX_SERIES = "DEXSZUS"          # D-14: CHF per USD, daily (FRED)
+OIL_WINDOW_DAYS = 10               # paper p. 7: last 10 daily obs; x_t = mean of last 10 days before the 1st of t
+OIL_X_RULE = "before"              # D-14 rev.: x_t = mean of last 10 days before the 1st of t ("first_days" = alt.)
+OIL_FIRST_DAYS = 5                 # "first_days" rule: first 5 daily prices of month t
+OIL_SAMPLE_START = "1993-05"       # D-14 rev.: oil items and crude from the 1993 basket on (longer than D-09)
+OIL_K_MAX = 3                      # D-14: Δx lags 0..3, chosen by SIC
+OIL_M_MAX = 3                      # D-14: Δp lags 0..3, chosen by SIC
+
+# ---------------------------------------------------------------------------
 # Collection frequency (paper fn. 9)
 # ---------------------------------------------------------------------------
 NO_COLLECTION_TOL = 1e-3           # |log change| below this counts as "not collected"
