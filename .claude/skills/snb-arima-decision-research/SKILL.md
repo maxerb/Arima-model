@@ -31,7 +31,8 @@ is done later in the task that owns the code.
    4. Textbooks and software docs: Hyndman & Athanasopoulos *FPP*, Hamilton, Lütkepohl, Durbin & Koopman (state space),
       `statsmodels` docs — for estimation mechanics (G1, G3, G6, G13).
    These names are starting points, not facts: **only cite a source you actually opened**, with the page/section where
-   the claim is. Never cite from memory; if a page cannot be fetched, say so and do not use it.
+   the claim is. Never cite from memory. If `web-fetch` returns an unreadable PDF, read the saved copy with
+   `Read(pages=…)`; if a page still cannot be opened, list it under "Unreachable sources" and do not use it.
 4. **Extract evidence** into a table: source, what they do / recommend, context (country, frequency, horizon), how close
    it is to our setting. Note disagreements explicitly — a split literature is a reason for a sensitivity check.
 5. **Optional quick empirical check.** If the data exist and the question is empirical (e.g. "how often does q = 2 bind?"),
@@ -81,7 +82,8 @@ Date: YYYY-MM-DD · Status of decision after research: proposed / confirmed
 - Prefer sources close to our setting (Swiss/euro-area CPI, monthly item level, short horizons) over generic advice.
 - Quote at most one short passage per source (< 15 words); otherwise paraphrase.
 - Never write numbers into the note that no source or script produced.
-- Several decisions at once: do them one after another (one note each), not merged.
+- Several decisions at once: one note each by default; if the user asks for one file, write
+  `docs/decision_research/best_practice.md` with one section per D-xx (same template headings).
 
 ## Checks (definition of done)
 - `docs/decision_research/D-xx.md` exists, every row of the evidence table has an opened source in "Sources".

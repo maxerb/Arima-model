@@ -7,11 +7,11 @@ description: Aggregate Swiss CPI item-level forecasts or actuals into total CPI,
 
 ## Interface (`src/arima_snb/aggregate.py`)
 ```python
-def aggregate_index(item_log_p: pd.DataFrame, weights: pd.DataFrame, items: list[str] | None = None) -> pd.Series:
-    """Chain-linked Laspeyres aggregate of item indices (actuals or forecast paths)."""
+def aggregate_index(item_index: pd.DataFrame, weights: pd.DataFrame, items: list[str] | None = None) -> pd.Series:
+    """Chain-linked Laspeyres aggregate of item index LEVELS (wide: month x item_id; not logs — the formula is in levels)."""
 def quarterly_yoy(index_m: pd.Series) -> pd.Series:
     """Quarterly average of a monthly index → y-o-y % change, indexed by pd.Period('Q')."""
-def build_subaggregate_series(panel, weights, level: Literal["agg1", "agg6", "agg14"]) -> pd.DataFrame:
+def build_subaggregate_series(item_index, weights, items: pd.DataFrame, level: Literal["agg1", "agg6", "agg14"]) -> pd.DataFrame:
     """Historical monthly sub-aggregate indices (inputs for ARIMA(1)/(6)/(14) benchmarks)."""
 ```
 
@@ -19,8 +19,9 @@ def build_subaggregate_series(panel, weights, level: Literal["agg1", "agg6", "ag
 For month `t` in year `y`, with weights `w_{i,y}` normalised over the items included:
 `A_t / A_{Dec,y−1} = Σ_i w_{i,y} · I_{i,t} / I_{i,Dec,y−1}`, then chain: `A_t = A_{Dec,y−1} · (…)`.
 Forecast paths crossing a year boundary use the **weights known at the origin** (next year's weights are unknown →
-keep current year's weights; log as decision). Before annual weight updates, apply the same formula with the weights of
-the relevant basket period and its base month (verify the base month for 2000–2007 bases).
+keep current year's weights; log as decision). Before annual weight updates the basket periods are May 1993→May 2000
+and May 2000→Dec 2001, then yearly December chaining (D-29). The old period must **include** the overlap month
+(May 2000), else the chain breaks.
 
 Inflation target: `π_q = 100 · (Ā_q / Ā_{q−4} − 1)` with `Ā_q` the 3-month average. When forecasting, splice: actual
 months up to origin, forecast months after.

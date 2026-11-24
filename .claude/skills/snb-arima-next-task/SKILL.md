@@ -68,5 +68,9 @@ The project must not depend on anything outside `Arima-model/`. Ask the user bef
 
 ## Rules
 - One task at a time unless the user asks for parallel work.
+- Run every script with `.venv/Scripts/python` (the package is installed there). If pip tries to build a wheel from
+  source, use `--only-binary=:all:` and pin the version it finds (F-022).
+- Edit markdown tables (`decisions.md`, board) with Python or the Edit tool, never `sed` with `|` in the pattern
+  (an escaped pipe matched the empty string and corrupted every line once).
 - Never mark `done` without a passing check.
 - If a task is bigger than expected, split it into sub-IDs (`T2.2a`, `T2.2b`) on the board rather than leaving it half-done.

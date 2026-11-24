@@ -23,9 +23,9 @@ description: Find, download and document the raw data for the SNB disaggregate-A
 | Collection calendars | Paper App. A (Tables 5–8) + BFS methodology docs ("Methodenübersicht") | For years after 2011, infer from data (see `snb-arima-cpi-panel`). |
 | Crude oil spot (daily) | e.g. FRED `DCOILBRENTEU` (Brent) / `DCOILWTICO` (WTI) | Paper says "crude oil spot price" — log choice (D-xx). |
 | USDCHF (daily + monthly) | SNB data portal (FX cube) or FRED `DEXSZUS` | Needed to convert oil to CHF. |
-| Mortgage rates | SNB data portal (bank interest rates) for the cantonal-bank series up to 2008Q2; BWO (Bundesamt für Wohnungswesen) average mortgage rate / Referenzzinssatz after | Paper fn. 3: linked in 2008Q2. |
+| Mortgage rates | SNB data portal cube `zikrepro`, series `M_MV` (variable-rate mortgages, 1976–today) — use this (F-010); BWO Referenzzinssatz only as reference (page is JS-only, no file) | Paper fn. 3: linked in 2008Q2 (D-19). |
 | Consensus forecasts | KOF Consensus (`data/raw/kof_*`, copied in T0.0) as substitute for Consensus Economics | Decision D-06. |
-| SNB conditional inflation forecast | SNB monetary policy assessment press releases (quarterly tables), 2004–2011 | Hand-collect into a CSV with `publication_date, target_quarter, value`; keep PDFs/links in `data_sources.md`. |
+| SNB conditional inflation forecast | SNB data portal cube `snbiprogq` (all vintages; F-009) | Press-release tables only as cross-check; load to `publication_date, target_quarter, value`. |
 
 ## Procedure
 1. Before downloading, check `data/raw/` and `codebook.csv` — don't duplicate.
@@ -34,9 +34,11 @@ description: Find, download and document the raw data for the SNB disaggregate-A
 3. Save raw files untouched. Write a loader in `io.py` that turns each file into long format with explicit parsing
    (`sep`, `skiprows`, date `format=`), documented by a comment saying when the layout was checked — follow `read_snb_cube` in `io.py`.
 4. Add codebook rows (`transform` = what the pipeline later does, e.g. `log, chain-link`).
-5. **T1.3 transcription:** create `data/meta/items_paper_table9.csv` (`item_en, weight_2010, agg6, agg14`) from PDF
-   pp. 21–25 and `data/meta/collection_calendar_paper.csv` (`period, group, item, months` or `aperiodic`/`seasonal`) from
-   Tables 5–8. Verify: Table 9 182-item weights sum to **92.788**, ARIMA(6) and ARIMA(14) weights sum to **100.000**.
+5. **T1.3 transcription:** create `data/meta/items_paper_table9.csv` (`item_no, item_en, weight_2010, agg6, agg14`) from
+   Table 9 (printed pp. 21–25 = PDF pp. 23–27). Table 9 gives only sub-aggregate *totals*: `agg14` follows from the item
+   order, `agg6` stays empty and is assigned in T1.4 (D-21). Skip page headers ("Table 8 continued") when parsing. Create `data/meta/collection_calendar_paper.csv` (`period, group, item, months` or `aperiodic`/`seasonal`) from
+   Tables 5–8 (PDF pp. 19–23). The calendar 'x' marks have no column position in the text layer: render the pages to
+   PNG, transcribe visually, then cross-check the number of marks per row against the text layer (F-012). Verify: Table 9 182-item weights sum to **92.788**, ARIMA(6) and ARIMA(14) weights sum to **100.000**.
 
 ## Checks
 - Every loader returns no duplicate `(date, variable)` pairs, a monotone monthly date index, and plausible value ranges.

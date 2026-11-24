@@ -16,40 +16,53 @@ Status: `open` · `proposed` · `applied` · `rejected` · `deferred`.
 | F-006 | 2026-11-24 | snb-arima-data | T1.1 | missing | Old BFS files are .xls → needs `xlrd`; repeated PosNo for special groupings below the main hierarchy; index levels > 1000 for back-cast PCs/TVs | improvised step | Add these three to Pitfalls | applied |
 | F-007 | 2026-11-24 | snb-arima-data | T1.1 | one-off | Scripts must run with `.venv/Scripts/python` (package installed there), not the system python | failed check | none (environment) | – |
 | F-008 | 2026-11-24 | snb-arima-next-task | T0.0–T1.4 | missing | Review page never updated after tasks: statuses and decisions were typed into the HTML and no step refreshed it (showed 0/22 done and D-01…D-08 after 7 tasks and 25 decisions) | user question "does the page update when tasks are done?" | `scripts/build_review_page.py` generates both from AGENTS.md / decisions.md; new step 9 "Refresh the review page" in the skill; `tests/test_review_page.py` fails when stale (user approved) | applied |
-| F-009 | 2026-11-24 | snb-arima-data | T1.2 | wrong | SNB conditional forecasts said "hand-collect"; they exist as SNB cube `snbiprogq` | improvised step (T1.2 retro) | Name the cube in the datasets table | proposed |
-| F-010 | 2026-11-24 | snb-arima-data | T1.2 | wrong | Mortgage rates: BWO page is JS-only (no file); SNB `zikrepro` `M_MV` covers 1976–today | failed download | List `zikrepro` first, BWO only as reference | proposed |
-| F-011 | 2026-11-24 | snb-arima-data | T1.3 | wrong | Step 5 implies Table 9 has per-item agg6/agg14 (it has only totals) and gives printed pp. 21–25 (= PDF pp. 23–27) | improvised step | Real columns, agg6 left empty (D-21), both page numbers | proposed |
-| F-012 | 2026-11-24 | snb-arima-data | T1.3 | missing | Calendar 'x' marks have no position in the PDF text layer; page headers leak into rows ("Table 8 continued Beef") | improvised method | Add method: render pages to PNG, transcribe, cross-check mark counts with text layer; skip headers | proposed |
-| F-013 | 2026-11-24 | snb-arima-cpi-panel | T1.4/T1.5 | wrong | Table 9 weights are LIK2005-basket weights for 2010 and are printed one row off for items 85–93, 119–124; matching inherited it (shoe repairs mapped twice) | failed check found in T1.5 | Step 1: match by those weights then order; check no BFS position used twice unless a documented merge (D-22 rev.) | proposed |
-| F-014 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Step 3 says weights constant between revisions; BFS GEWICHTUNGEN has a column per year from 2002 (1993 col → 1993–99, 2000/01 → 2000–01); merges in later baskets need a split rule | improvised + asked user (D-26, D-27) | Replace step-3 rule; add split rule | proposed |
-| F-015 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Check "no jump > 20 % at link month" cannot detect wrong links (ratio linking never jumps) | failed check | Replace by agreement of linked changes with BFS back-casts (`panel.backcast_agreement`) | proposed |
-| F-016 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | missing | 1993 and 2025 baskets renumber positions; names repeat (retail vs restaurant wine/beer) | improvised rule D-25 | Add pitfall | proposed |
-| F-017 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Step 4: agg6 is neither in Table 9 nor in BFS files | resolved with user (D-21 rev.) | Point to `data/meta/agg6_rules.csv` + `classify.item_agg6` | proposed |
-| F-018 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | missing | Calendar rows are BFS sub-groups, not model items | improvised `data/meta/collection_calendar_items.csv` | Mention the hand map in step 5 | proposed |
-| F-019 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Coverage check 92.8 % is the paper's sum; true BFS weights give 92.70 % (skirts 0.230 vs 0.143) | check value | Change check to ≈ 92.7 % | proposed |
-| F-020 | 2026-11-24 | snb-arima-aggregate | T1.6 | wrong | Interface: `aggregate_index` takes index levels (`item_index`), not logs; `build_subaggregate_series` needs `items` | API mismatch with code | Copy real signatures | proposed |
-| F-021 | 2026-11-24 | snb-arima-aggregate | T1.6 | ambiguous | "verify base month for 2000–2007": answer is basket periods May 1993→May 2000, May 2000→Dec 2001, then yearly Dec chaining; old period must include the overlap month | D-29 | State it, cite D-29 | proposed |
-| F-022 | 2026-11-24 | snb-arima-next-task | T1.1/T1.2/T1.6 | missing | Recurring (F-007 + T1.2 + T1.6): scripts need `.venv/Scripts/python`; pip built matplotlib from source → `--only-binary=:all:`; `sed` with escaped pipes corrupted decisions.md → edit markdown tables with Python | 3 tasks | Add to Rules | proposed |
-| F-023 | 2026-11-24 | snb-arima-decision-research | D-xx batch | missing | User wanted all decisions in one file; PDFs unreadable via fetch could be read with Read(pages=…) | user request + improvised | Allow batch file `best_practice.md`; PDF fallback; table of unreachable sources | proposed |
+| F-009 | 2026-11-24 | snb-arima-data | T1.2 | wrong | SNB conditional forecasts said "hand-collect"; they exist as SNB cube `snbiprogq` | improvised step (T1.2 retro) | Name the cube in the datasets table | applied (P1 retro, user OK; eval data S-1) |
+| F-010 | 2026-11-24 | snb-arima-data | T1.2 | wrong | Mortgage rates: BWO page is JS-only (no file); SNB `zikrepro` `M_MV` covers 1976–today | failed download | List `zikrepro` first, BWO only as reference | applied (P1 retro, user OK; eval data S-2) |
+| F-011 | 2026-11-24 | snb-arima-data | T1.3 | wrong | Step 5 implies Table 9 has per-item agg6/agg14 (it has only totals) and gives printed pp. 21–25 (= PDF pp. 23–27) | improvised step | Real columns, agg6 left empty (D-21), both page numbers | applied (P1 retro, user OK; eval data S-3) |
+| F-012 | 2026-11-24 | snb-arima-data | T1.3 | missing | Calendar 'x' marks have no position in the PDF text layer; page headers leak into rows ("Table 8 continued Beef") | improvised method | Add method: render pages to PNG, transcribe, cross-check mark counts with text layer; skip headers | applied (P1 retro, user OK; eval data S-3) |
+| F-013 | 2026-11-24 | snb-arima-cpi-panel | T1.4/T1.5 | wrong | Table 9 weights are LIK2005-basket weights for 2010 and are printed one row off for items 85–93, 119–124; matching inherited it (shoe repairs mapped twice) | failed check found in T1.5 | Step 1: match by those weights then order; check no BFS position used twice unless a documented merge (D-22 rev.) | applied (P1 retro, user OK; eval cpi-panel S-1) |
+| F-014 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Step 3 says weights constant between revisions; BFS GEWICHTUNGEN has a column per year from 2002 (1993 col → 1993–99, 2000/01 → 2000–01); merges in later baskets need a split rule | improvised + asked user (D-26, D-27) | Replace step-3 rule; add split rule | applied (P1 retro, user OK; eval cpi-panel S-2) |
+| F-015 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Check "no jump > 20 % at link month" cannot detect wrong links (ratio linking never jumps) | failed check | Replace by agreement of linked changes with BFS back-casts (`panel.backcast_agreement`) | applied (P1 retro, user OK; eval cpi-panel S-3) |
+| F-016 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | missing | 1993 and 2025 baskets renumber positions; names repeat (retail vs restaurant wine/beer) | improvised rule D-25 | Add pitfall | applied (P1 retro, user OK; eval cpi-panel S-1) |
+| F-017 | 2026-11-24 | snb-arima-cpi-panel | T1.4 | wrong | Step 4: agg6 is neither in Table 9 nor in BFS files | resolved with user (D-21 rev.) | Point to `data/meta/agg6_rules.csv` + `classify.item_agg6` | applied (P1 retro, user OK; eval cpi-panel S-4) |
+| F-018 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | missing | Calendar rows are BFS sub-groups, not model items | improvised `data/meta/collection_calendar_items.csv` | Mention the hand map in step 5 | applied (P1 retro, user OK; eval cpi-panel S-4) |
+| F-019 | 2026-11-24 | snb-arima-cpi-panel | T1.5 | wrong | Coverage check 92.8 % is the paper's sum; true BFS weights give 92.70 % (skirts 0.230 vs 0.143) | check value | Change check to ≈ 92.7 % | applied (P1 retro, user OK; eval cpi-panel S-4) |
+| F-020 | 2026-11-24 | snb-arima-aggregate | T1.6 | wrong | Interface: `aggregate_index` takes index levels (`item_index`), not logs; `build_subaggregate_series` needs `items` | API mismatch with code | Copy real signatures | applied (P1 retro, user OK; eval aggregate S-1) |
+| F-021 | 2026-11-24 | snb-arima-aggregate | T1.6 | ambiguous | "verify base month for 2000–2007": answer is basket periods May 1993→May 2000, May 2000→Dec 2001, then yearly Dec chaining; old period must include the overlap month | D-29 | State it, cite D-29 | applied (P1 retro, user OK; eval aggregate S-2) |
+| F-022 | 2026-11-24 | snb-arima-next-task | T1.1/T1.2/T1.6 | missing | Recurring (F-007 + T1.2 + T1.6): scripts need `.venv/Scripts/python`; pip built matplotlib from source → `--only-binary=:all:`; `sed` with escaped pipes corrupted decisions.md → edit markdown tables with Python | 3 tasks | Add to Rules | applied (P1 retro, user OK; eval next-task S-1) |
+| F-023 | 2026-11-24 | snb-arima-decision-research | D-xx batch | missing | User wanted all decisions in one file; PDFs unreadable via fetch could be read with Read(pages=…) | user request + improvised | Allow batch file `best_practice.md`; PDF fallback; table of unreachable sources | applied (P1 retro, user OK; eval decision-research 5) |
 | F-024 | 2026-11-24 | snb-arima-next-task | T0.2 | one-off | T0.2 check `tests/test_decisions.py` not named in skill | improvised | none (T0.2 never recurs) | rejected |
 
 ## Summary per skill (updated at each macro retro)
 
-| Skill | Uses | Findings | User corrections | Last retro |
-|---|---|---|---|---|
-| snb-arima-next-task | 0 | 0 | 0 | – |
-| snb-arima-data | 0 | 0 | 0 | – |
-| snb-arima-cpi-panel | 0 | 0 | 0 | – |
-| snb-arima-item-diagnostics | 0 | 0 | 0 | – |
-| snb-arima-item-models | 0 | 0 | 0 | – |
-| snb-arima-oil-rent | 0 | 0 | 0 | – |
-| snb-arima-aggregate | 0 | 0 | 0 | – |
-| snb-arima-evaluation | 0 | 0 | 0 | – |
-| snb-arima-kalman-extension | 0 | 0 | 0 | – |
-| snb-arima-report | 0 | 0 | 0 | – |
-| skill-feedback-loop | 0 | 0 | 0 | – |
+Uses = tasks in which the skill was followed. Findings by type: w = wrong, m = missing, a = ambiguous, o = one-off.
+User corrections = the user had to correct the agent (decisions the user was asked to make do not count).
+
+| Skill | Uses | Findings (w/m/a/o) | User corrections | Corrections per use | Last retro |
+|---|---|---|---|---|---|
+| snb-arima-next-task | 9 (T0.0–T1.6) | 6 (0/4/1/1) | 1 (F-008) | 0.11 | P1, 2026-11-24 |
+| snb-arima-data | 3 (T1.1–T1.3) | 7 (4/2/0/1) | 0 | 0 | P1, 2026-11-24 |
+| snb-arima-cpi-panel | 2 (T1.4–T1.5) | 7 (5/2/0/0) | 0 | 0 | P1, 2026-11-24 |
+| snb-arima-aggregate | 1 (T1.6) | 2 (1/0/1/0) | 0 | 0 | P1, 2026-11-24 |
+| snb-arima-decision-research | 1 | 1 (0/1/0/0) | 0 | 0 | P1, 2026-11-24 |
+| snb-arima-item-diagnostics | 0 (T2.1 running) | 0 | 0 | – | – |
+| snb-arima-item-models | 0 | 0 | 0 | – | – |
+| snb-arima-oil-rent | 0 | 0 | 0 | – | – |
+| snb-arima-evaluation | 0 | 0 | 0 | – | – |
+| snb-arima-kalman-extension | 0 | 0 | 0 | – | – |
+| snb-arima-report | 0 | 0 | 0 | – | – |
+| skill-feedback-loop | 10 (micro retros + P1 macro) | 0 | 0 | 0 | P1, 2026-11-24 |
+
+**P1 macro retro (2026-11-24).** 15 findings applied (F-009…F-023), 1 rejected (F-024). Review page: no `reviews` or
+`feedback` rows yet. Consistency pass: skill file contracts match AGENTS.md §4; `aggregate` signatures were out of date
+(F-020, fixed). Pattern: P1 skills were written before the data were seen, so most findings are `wrong` facts about BFS
+files and the paper's tables (8 of 15) — expect fewer once P2 skills are used against real data. Pruning: none needed
+(all SKILL.md ≤ 100 lines). Generalisable lessons (candidates for a user-level skill, not created): "edit markdown tables
+with Python, not sed"; "ratio chain-linking cannot be checked by level jumps — compare with back-casts".
 
 ## Ideas (not evidence yet; do not apply)
+
+_P1 micro-retro candidates below were processed in the P1 macro retro as F-009…F-024._
 
 ### Micro retro T0.2 (2026-11-24) — snb-arima-next-task
 - Finding: skill lists G4 among the "important" gaps to confirm, but the ask tool fits 4 questions; G4 (origins) was left `proposed` since it follows directly from the paper. No skill edit needed.
