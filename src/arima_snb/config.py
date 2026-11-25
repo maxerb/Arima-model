@@ -124,3 +124,13 @@ PAPER_RMSFE = {
     "arima182": (0.08, 0.41, 0.72, 0.92, 1.04),          # Table 2, ARIMA(182) - plain ARIMA for oil and rents
     "arima182_special": (0.04, 0.36, 0.66, 0.83, 0.96),  # Table 1, real-time ARIMA (closest analogue, D-50)
 }
+
+# ---------------------------------------------------------------------------
+# Extended ARIMA evaluation (T4.2, paper Table 4 p. 15; decisions D-41 ... D-44, D-52, D-53)
+# ---------------------------------------------------------------------------
+# (value, DMW p-value) per h = 1..5; first row absolute RMSFE (no test), others relative RMSFE vs extended ARIMA(182)
+PAPER_TABLE4 = {
+    "kalman182": ((0.06, None), (0.32, None), (0.64, None), (0.86, None), (1.00, None)),
+    "arima182": ((1.18, 0.278), (1.28, 0.067), (1.11, 0.157), (1.07, 0.184), (1.04, 0.438)),
+    "arima182_special": ((0.57, 0.003), (1.12, 0.321), (1.02, 0.466), (0.97, 0.258), (0.95, 0.203)),
+}

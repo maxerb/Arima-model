@@ -131,7 +131,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T3.3 | RMSFE, relative RMSFE, DMW-HLN → Tables 1–3 | `snb-arima-evaluation` | T3.2, T2.3, T2.4 | todo |
 | **P4** | **Extension from the paper** | | | |
 | T4.1 | Collection-frequency state-space model (App. C), sample from 1993 | `snb-arima-kalman-extension` | T2.1 | done (2026-11-24; all 182 items, SARIMAX on levels with gaps, SIC orders per vintage 2003–2010, Chart 3 replica; D-41…D-44) |
-| T4.2 | Evaluate extended ARIMA(182) → Table 4 | `snb-arima-evaluation` | T4.1, T3.1 | todo |
+| T4.2 | Evaluate extended ARIMA(182) → Table 4 | `snb-arima-evaluation` | T4.1, T3.1 | done (2026-11-25; 32 origins, all 182 items; RMSFE 0.09/0.46/0.75/0.92/1.01 vs paper 0.06/0.32/0.64/0.86/1.00 — no gain over ARIMA(182) at h=1–3, loss in Health; DMW-HLN in kalman_eval.dmw_hln for T3.3; D-52, D-53) |
 | **P5** | **Thesis extension** | | | |
 | T5.1 | Extend evaluation to 2012–latest; sub-periods; robustness to decisions D-xx | `snb-arima-evaluation` | T3.3 | todo |
 | T5.2 | (optional) Error decomposition: oil price and exchange-rate surprises (paper p. 9) | `snb-arima-evaluation` | T3.3 | todo |
