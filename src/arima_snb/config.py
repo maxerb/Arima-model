@@ -149,3 +149,30 @@ PAPER_RELATIVE = {
     ("arima182", "arima6"): (1.03, 1.17, 1.05, 1.05, 1.03),
     ("arima182", "arima1"): (1.27, 1.60, 1.40, 1.43, 1.29),
 }
+
+# ---------------------------------------------------------------------------
+# Replication tables 1-3 (T3.3, paper pp. 9, 11, 12; transcribed in docs/paper_spec.md §6; decisions D-52, D-58)
+# ---------------------------------------------------------------------------
+# Same format as PAPER_TABLE4: per row, (value, DMW p-value) for h = 1..5; the first row of each block is the
+# absolute RMSFE of the reference model (no test). None = no number in the paper ('–').
+PAPER_TABLE1 = {   # reference: real-time ARIMA (our analogue arima182_special, D-50)
+    "arima182_special": ((0.04, None), (0.36, None), (0.66, None), (0.83, None), (0.96, None)),
+    "snb_conditional": ((2.40, 0.003), (1.25, 0.170), (1.13, 0.280), (1.11, 0.530), (1.07, 0.680)),
+    "consensus_economics": ((3.43, 0.001), (1.32, 0.028), (1.04, 0.465), (1.04, 0.582), (1.01, 0.918)),
+    "ar1": ((3.37, 0.004), (1.19, 0.087), (1.08, 0.287), (1.08, 0.223), (1.06, 0.292)),
+}
+PAPER_TABLE2 = {   # reference: ARIMA(182) with plain ARIMA for oil products and rents
+    "arima182": ((0.08, None), (0.41, None), (0.72, None), (0.92, None), (1.04, None)),
+    "arima14": ((1.01, 0.970), (1.19, 0.182), (1.04, 0.254), (1.04, 0.242), (1.01, 0.898)),
+    "arima6": ((1.03, 0.844), (1.17, 0.002), (1.05, 0.236), (1.05, 0.215), (1.03, 0.625)),
+    "arima1": ((1.27, 0.220), (1.60, 0.002), (1.40, 0.007), (1.43, 0.112), (1.29, 0.317)),
+}
+PAPER_TABLE3 = {   # two blocks: oil products (reference ECM) and rents (reference ARIMA + mortgage rate)
+    "oil_ecm": ((1.14, None), (6.72, None), (12.49, None), (15.25, None), (17.10, None)),
+    "oil_arima": ((1.34, 0.030), (1.30, 0.034), (1.13, 0.256), (1.07, 0.497), (1.04, 0.710)),
+    "oil_realtime": ((0.70, 0.133), (1.10, 0.268), (1.08, 0.151), (1.06, 0.189), (1.04, 0.040)),
+    "rent_model": ((0.00, None), (0.24, None), (0.46, None), (0.56, None), (0.61, None)),
+    "rent_arima": ((None, None), (1.18, 0.148), (1.44, 0.005), (1.72, 0.000), (1.90, 0.000)),
+    "rent_realtime": ((None, None), (1.07, 0.670), (1.01, 0.975), (1.01, 0.967), (1.10, 0.793)),
+}
+SIGNIFICANCE_LEVEL = 0.10   # DMW-HLN p < 0.10 is printed in bold (paper p. 10: significance at 10 %)

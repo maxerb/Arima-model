@@ -19,8 +19,8 @@ and the expected collection months are those observed in the year before the ori
 The item forecasts used for aggregation are the published-like paths (prices carried forward between expected
 collection months, as the SFSO does).
 
-The DMW-HLN test lives here (`dmw_hln`) because `evaluate.py` belongs to T3.2/T3.3 at the moment; T3.3 can call it
-from `evaluate.dmw_test` (D-52).
+The DMW-HLN test (`dmw_hln`, D-52) was written here in T4.2 and moved to `evaluate.py` in T3.3; it is re-exported
+below.
 
 No look-ahead (AGENTS.md rule 1): `kalman_item_forecasts` receives the full data and cuts CPI and collection flags
 at the origin itself; `kalman_ext.observed_levels` cuts again inside every fit.
@@ -34,7 +34,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy import stats
 
 from arima_snb import evaluate
 from arima_snb.config import FORECAST_STEPS, KALMAN_N_JOBS
@@ -127,53 +126,7 @@ def run_kalman_oos(inputs: dict, orders: pd.DataFrame, origins, n_jobs: int = KA
 
 
 # ---------------------------------------------------------------------------
-# Diebold-Mariano-West test with the Harvey-Leybourne-Newbold correction
+# DMW-HLN test and the paper-layout comparison table moved to `evaluate` in T3.3 (shared by Tables 1-4, D-52);
+# re-exported here so T4.2 code and tests keep working.
 # ---------------------------------------------------------------------------
-def dmw_hln(e_bench, e_ref, h: int) -> tuple[float, float]:
-    """DMW test of equal squared-error loss, HLN small-sample correction; returns (statistic, two-sided p-value).
-
-    d_t = e_bench,t^2 - e_ref,t^2 (> 0 on average => the reference model is more accurate).
-    An h-step forecast error is autocorrelated up to lag h-1 (overlapping horizons), so the long-run variance of d
-    uses the autocovariances up to lag h-1 with equal weights (rectangular kernel, Diebold & Mariano 1995). If that
-    estimate is not positive, the Newey-West (Bartlett) weights are used instead. HLN (1997):
-    DM* = DM * sqrt((T + 1 - 2h + h(h-1)/T) / T), compared with Student t(T-1). Skill snb-arima-evaluation, D-52.
-    """
-    d = np.asarray(e_bench, float) ** 2 - np.asarray(e_ref, float) ** 2
-    T = len(d)
-    dbar = d.mean()
-    dc = d - dbar
-    gamma = [np.dot(dc[k:], dc[: T - k]) / T for k in range(h)]
-    v = gamma[0] + 2 * sum(gamma[1:])
-    if v <= 0:
-        v = gamma[0] + 2 * sum((1 - k / h) * gamma[k] for k in range(1, h))
-    if v <= 0:
-        return np.nan, np.nan
-    dm = dbar / np.sqrt(v / T)
-    dm_star = dm * np.sqrt((T + 1 - 2 * h + h * (h - 1) / T) / T)
-    p = 2 * stats.t.sf(abs(dm_star), df=T - 1)
-    return float(dm_star), float(p)
-
-
-# ---------------------------------------------------------------------------
-# Table 4 in the paper's layout
-# ---------------------------------------------------------------------------
-def comparison_table(ev: pd.DataFrame, reference: str, benchmarks: list[str],
-                     actual: str = "pi_actual") -> pd.DataFrame:
-    """Long table: reference absolute RMSFE, then each benchmark's relative RMSFE and DMW-HLN p-value, per h.
-
-    Relative RMSFE = RMSFE_benchmark / RMSFE_reference (> 1 => reference better), paper p. 10. Only origins where
-    both models have a forecast enter each pair.
-    """
-    rows = []
-    wide = ev.pivot_table(index=["origin_q", "h"], columns="model", values="pi_hat")
-    act = ev.groupby(["origin_q", "h"])[actual].first()
-    for h, g in wide.groupby(level="h"):
-        e_ref_all = act.loc[g.index] - g[reference]
-        rows.append({"row": reference, "h": h, "value": evaluate.rmsfe(e_ref_all.dropna()), "p_value": np.nan,
-                     "T": int(e_ref_all.notna().sum())})
-        for b in benchmarks:
-            pair = pd.DataFrame({"ref": e_ref_all, "bench": act.loc[g.index] - g[b]}).dropna()
-            _, p = dmw_hln(pair.bench, pair.ref, int(h))
-            rows.append({"row": b, "h": h, "value": evaluate.rmsfe(pair.bench) / evaluate.rmsfe(pair.ref),
-                         "p_value": p, "T": len(pair)})
-    return pd.DataFrame(rows)
+from arima_snb.evaluate import comparison_table, dmw_hln  # noqa: E402,F401

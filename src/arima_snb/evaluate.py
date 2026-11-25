@@ -36,6 +36,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from arima_snb import aggregate
 from arima_snb.config import (EVAL_END, EVAL_START, FINAL, FORECAST_STEPS, HORIZONS, INTERIM, OOS_N_JOBS,
@@ -263,6 +264,69 @@ def rmsfe_by_h(ev: pd.DataFrame, actual: str = "pi_actual") -> pd.DataFrame:
     return ev.assign(err=err).groupby(["model", "h"]).err.agg(rmsfe).unstack("h")
 
 
-def dmw_test(e_bench: pd.Series, e_ref: pd.Series, h: int) -> tuple[float, float]:
-    """Diebold-Mariano-West test with the Harvey-Leybourne-Newbold correction; returns (statistic, p-value)."""
-    raise NotImplementedError("T3.3")
+# ---------------------------------------------------------------------------
+# Diebold-Mariano-West test with the Harvey-Leybourne-Newbold correction
+# ---------------------------------------------------------------------------
+def dmw_hln(e_bench, e_ref, h: int) -> tuple[float, float]:
+    """DMW test of equal squared-error loss, HLN small-sample correction; returns (statistic, two-sided p-value).
+
+    d_t = e_bench,t^2 - e_ref,t^2 (> 0 on average => the reference model is more accurate).
+    An h-step forecast error is autocorrelated up to lag h-1 (overlapping horizons), so the long-run variance of d
+    uses the autocovariances up to lag h-1 with equal weights (rectangular kernel, Diebold & Mariano 1995). If that
+    estimate is not positive, the Newey-West (Bartlett) weights are used instead. HLN (1997):
+    DM* = DM * sqrt((T + 1 - 2h + h(h-1)/T) / T), compared with Student t(T-1). Skill snb-arima-evaluation, D-52.
+    """
+    d = np.asarray(e_bench, float) ** 2 - np.asarray(e_ref, float) ** 2
+    T = len(d)
+    dbar = d.mean()
+    dc = d - dbar
+    gamma = [np.dot(dc[k:], dc[: T - k]) / T for k in range(h)]
+    v = gamma[0] + 2 * sum(gamma[1:])
+    if v <= 0:
+        v = gamma[0] + 2 * sum((1 - k / h) * gamma[k] for k in range(1, h))
+    if v <= 0:
+        return np.nan, np.nan
+    dm = dbar / np.sqrt(v / T)
+    dm_star = dm * np.sqrt((T + 1 - 2 * h + h * (h - 1) / T) / T)
+    p = 2 * stats.t.sf(abs(dm_star), df=T - 1)
+    return float(dm_star), float(p)
+
+
+# ---------------------------------------------------------------------------
+# Relative RMSFE + DMW-HLN in the paper's layout (Tables 1-4)
+# ---------------------------------------------------------------------------
+def comparison_table(ev: pd.DataFrame, reference: str, benchmarks: list[str], actual: str = "pi_actual",
+                     test_lag: dict | None = None) -> pd.DataFrame:
+    """Long table: reference absolute RMSFE, then each benchmark's relative RMSFE and DMW-HLN p-value, per h.
+
+    Relative RMSFE = RMSFE_benchmark / RMSFE_reference (> 1 => reference better), paper p. 10. Only origins where
+    both models have a forecast enter each pair (D-52); the absolute row uses every forecast of the reference.
+    test_lag : optional {h: h_test} - the 'h' passed to the DMW test when the overlap of the forecast errors is not
+               h - 1 (annual targets, D-58). Default: h itself.
+    A reference with zero errors (rents at h = 1: collected in the origin month) gives no ratio and no test.
+    """
+    rows = []
+    wide = ev.pivot_table(index=["origin_q", "h"], columns="model", values="pi_hat")
+    act = ev.groupby(["origin_q", "h"])[actual].first()
+    for h, g in wide.groupby(level="h"):
+        h_test = int((test_lag or {}).get(h, h))
+        e_ref_all = act.loc[g.index] - g[reference]
+        rows.append({"row": reference, "h": h, "value": rmsfe(e_ref_all.dropna()), "p_value": np.nan,
+                     "T": int(e_ref_all.notna().sum())})
+        for b in benchmarks:
+            pair = pd.DataFrame({"ref": e_ref_all, "bench": act.loc[g.index] - g[b]}).dropna()
+            r_ref = rmsfe(pair.ref)
+            if r_ref == 0:
+                rel, p = np.nan, np.nan
+            else:
+                rel, p = rmsfe(pair.bench) / r_ref, dmw_hln(pair.bench, pair.ref, h_test)[1]
+            rows.append({"row": b, "h": h, "value": rel, "p_value": p, "T": len(pair)})
+    return pd.DataFrame(rows)
+
+
+def dmw_test(e_bench, e_ref, h: int) -> tuple[float, float]:
+    """Diebold-Mariano-West test with the Harvey-Leybourne-Newbold correction; returns (statistic, p-value).
+
+    Alias of `dmw_hln` (D-52), kept because the skill and earlier code refer to this name.
+    """
+    return dmw_hln(e_bench, e_ref, h)

@@ -110,3 +110,48 @@ def test_random_walk_benchmark_reproduced_exactly():
     expected_h1 = 100 * (q_now / q_prev - 1)
     got = q[(q["aggregate"] == "total") & (q.h == 1)].pi_hat.iloc[0]
     assert np.isclose(got, expected_h1, atol=1e-8)
+
+
+# ---------------------------------------------------------------------------
+# T3.3: DMW-HLN in evaluate (moved from kalman_eval) and the comparison table
+# ---------------------------------------------------------------------------
+def test_dmw_test_hand_example_h3():
+    """d = [2, -1, 3, 0, 1, -1]; T = 6, h = 3: rectangular kernel with gamma_0..gamma_2 (hand-computed)."""
+    from scipy import stats
+
+    d = np.array([2.0, -1, 3, 0, 1, -1])
+    e_ref = np.ones(6) * 2.0
+    e_bench = np.sqrt(d + 4.0)                          # e_bench^2 - e_ref^2 = d
+    dbar = d.mean()                                     # 4/6
+    dc = d - dbar
+    g = [np.dot(dc[k:], dc[:6 - k]) / 6 for k in range(3)]
+    v = g[0] + 2 * (g[1] + g[2])
+    if v <= 0:                                          # Newey-West fallback (D-52)
+        v = g[0] + 2 * ((2 / 3) * g[1] + (1 / 3) * g[2])
+    dm_star = dbar / np.sqrt(v / 6) * np.sqrt((6 + 1 - 6 + 3 * 2 / 6) / 6)
+    stat, p = evaluate.dmw_test(e_bench, e_ref, h=3)
+    assert stat == pytest.approx(dm_star) and p == pytest.approx(2 * stats.t.sf(abs(dm_star), 5))
+    from arima_snb import kalman_eval
+    assert kalman_eval.dmw_hln is evaluate.dmw_hln      # T4.2 keeps using the same function
+
+
+def test_comparison_table_common_sample_zero_reference_and_test_lag():
+    """Pairs use only shared origins; a zero-error reference gives no ratio; test_lag changes only the p-value."""
+    act = np.arange(6, dtype=float)
+    ev = pd.concat([
+        pd.DataFrame({"origin_q": list("abcdef"), "h": 1, "model": "ref", "pi_actual": act, "pi_hat": act}),
+        pd.DataFrame({"origin_q": list("abcdef"), "h": 2, "model": "ref", "pi_actual": act,
+                      "pi_hat": act + [1, -1, 1, -1, 1, -1]}),
+        pd.DataFrame({"origin_q": list("abcdef"), "h": [1] * 6, "model": "b", "pi_actual": act,
+                      "pi_hat": act + 1}),
+        pd.DataFrame({"origin_q": list("abcdef"), "h": 2, "model": "b", "pi_actual": act,
+                      "pi_hat": [np.nan, 1 - 2, 2 + 2, 3 - 3, 4 + 1, 5 - 2]}),
+    ])
+    tab = evaluate.comparison_table(ev, "ref", ["b"]).set_index(["row", "h"])
+    assert np.isnan(tab.loc[("b", 1), "value"]) and np.isnan(tab.loc[("b", 1), "p_value"])
+    assert tab.loc[("ref", 2), "T"] == 6 and tab.loc[("b", 2), "T"] == 5          # common sample: 'a' dropped
+    assert tab.loc[("b", 2), "value"] == pytest.approx(np.sqrt((4 + 4 + 9 + 1 + 4) / 5) / 1.0)
+    tab1 = evaluate.comparison_table(ev, "ref", ["b"], test_lag={2: 1}).set_index(["row", "h"])
+    assert tab1.loc[("b", 2), "value"] == tab.loc[("b", 2), "value"]
+    assert tab1.loc[("b", 2), "p_value"] == pytest.approx(evaluate.dmw_hln(
+        np.array([-2, 2, -3, 1, -2.0]), np.array([-1, 1, -1, 1, -1.0]), 1)[1])
