@@ -134,3 +134,18 @@ PAPER_TABLE4 = {
     "arima182": ((1.18, 0.278), (1.28, 0.067), (1.11, 0.157), (1.07, 0.184), (1.04, 0.438)),
     "arima182_special": ((0.57, 0.003), (1.12, 0.321), (1.02, 0.466), (0.97, 0.258), (0.95, 0.203)),
 }
+
+# ---------------------------------------------------------------------------
+# Benchmarks (T3.2, paper Tables 1-2 pp. 9 and 11; decisions D-05, D-06 rev., D-20, D-47, D-55 ... D-57)
+# ---------------------------------------------------------------------------
+# Relative RMSFE (benchmark / reference) per h = 1..5, as sanity targets. Table 1 reference = real-time ARIMA
+# (our analogue arima182_special), Table 2 reference = ARIMA(182) (arima182). Consensus = Consensus Economics,
+# which our KOF benchmark does not replicate (D-06 rev.).
+PAPER_RELATIVE = {
+    ("arima182_special", "snb_conditional"): (2.40, 1.25, 1.13, 1.11, 1.07),
+    ("arima182_special", "kof_consensus"): (3.43, 1.32, 1.04, 1.04, 1.01),
+    ("arima182_special", "ar1"): (3.37, 1.19, 1.08, 1.08, 1.06),
+    ("arima182", "arima14"): (1.01, 1.19, 1.04, 1.04, 1.01),
+    ("arima182", "arima6"): (1.03, 1.17, 1.05, 1.05, 1.03),
+    ("arima182", "arima1"): (1.27, 1.60, 1.40, 1.43, 1.29),
+}

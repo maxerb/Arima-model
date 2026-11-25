@@ -127,7 +127,7 @@ Each task names its skill; the skill holds the detailed procedure and the defini
 | T2.5 | Aggregation to CPI, ARIMA(6), ARIMA(14), core; quarterly y-o-y | `snb-arima-aggregate` | T2.2 | done (2026-11-24; spliced chained Laspeyres with origin weights, total/excl. oil/agg6/agg14, h=1-5; ARIMA(1)=official CPI, D-45...D-47) |
 | **P3** | **Replication of the evaluation** | | | |
 | T3.1 | Pseudo-OOS engine (origins 2004–2011, 2 months known, h = 1–5) | `snb-arima-evaluation` | T2.5 | done (2026-11-24; 32 origins, expanding window, per-origin cache; arima182 RMSFE 0.08/0.46/0.73/0.94/1.03 ≈ paper Table 2; arima182_special = oil ECM + rent model; D-03/D-04 confirmed, D-50, D-51) |
-| T3.2 | Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional | `snb-arima-evaluation` | T3.1 | todo |
+| T3.2 | Benchmarks: AR(1), ARIMA(1), ARIMA(6), ARIMA(14), consensus, SNB conditional | `snb-arima-evaluation` | T3.1 | done (2026-11-25; `benchmarks.py`, rel. RMSFE vs ARIMA(182): ARIMA(1) 1.36/1.44/1.28/1.25/1.13, ARIMA(6)/(14) ≈ 1.0–1.1; AR(1) with month intercepts, SNB T = 31, KOF on annual target; D-05 rev., D-55…D-57) |
 | T3.3 | RMSFE, relative RMSFE, DMW-HLN → Tables 1–3 | `snb-arima-evaluation` | T3.2, T2.3, T2.4 | todo |
 | **P4** | **Extension from the paper** | | | |
 | T4.1 | Collection-frequency state-space model (App. C), sample from 1993 | `snb-arima-kalman-extension` | T2.1 | done (2026-11-24; all 182 items, SARIMAX on levels with gaps, SIC orders per vintage 2003–2010, Chart 3 replica; D-41…D-44) |
