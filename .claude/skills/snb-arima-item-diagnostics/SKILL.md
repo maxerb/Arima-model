@@ -5,8 +5,9 @@ description: Step 1 of the SNB ARIMA item-model specification - per CPI item run
 
 # SNB ARIMA — item diagnostics → `item_specs.csv` (T2.1)
 
-Paper p. 6: done "only every few years", so specs are fixed per **spec vintage** (e.g. one for origins 2004–2007 using data
-to 2003, one for 2008–2011 using data to 2007). Never use data after the vintage date (no look-ahead). Log the vintage scheme as a decision.
+Paper p. 6: done "only every few years", so specs are fixed per **spec vintage**. The vintage scheme is a choice to put
+to the user (few vintages, e.g. 2003/2007, vs. yearly); this project uses **yearly vintages**: vintage Y uses data to Dec Y
+and serves origins in Y+1 (D-31, `SPEC_VINTAGES`, `diagnostics.specs_for_origin`). Never use data after the vintage date.
 
 ## Procedure (per item, data up to the vintage date)
 1. **Integration order.** On `log_p` (collected months for infrequent items, or quarterly sampling for quarterly items):
@@ -16,7 +17,9 @@ to 2003, one for 2008–2011 using data to 2007). Never use data after the vinta
      record test outcomes and only flag the rare items where tests disagree at 5 % (`d_flag`), do not change `d`.
 2. **Seasonality.** ACF of `Δlog_p` (monthly items) up to lag 36. Seasonal if the ACF at lag 12 (and ideally 24) is outside
    ±1.96/√T and positive. Clothing/footwear and fresh vegetables should come out seasonal; rice should not (paper Chart 1).
-3. **Collection frequency** from `collection.csv` as of the vintage: `monthly`, `bimonthly`/`6x`, `quarterly`, `less_than_quarterly`, `aperiodic`.
+3. **Collection frequency** from `collection.csv` as of the vintage, by collections per year (D-34): ≥ 10 `monthly`,
+   5–9 `6x`, 3–4 `quarterly`, ≤ 2 `less_than_quarterly`. Take max(inferred, calendar) count: inferred flags
+   undercount (a collected but unchanged price looks like no collection).
 4. **Method assignment**
    - `special == oil` → `ecm`; `special == rent` → `rent`.
    - `less_than_quarterly` → `adhoc_last` (no model, paper p. 7).
@@ -27,7 +30,8 @@ to 2003, one for 2008–2011 using data to 2007). Never use data after the vinta
    collection_freq, quarterly_lags, method, reason`.
 
 ## Checks
-- Count items per method and per vintage; the vast majority should be `arima` with d = 1 (paper: "very few" fail).
+- Count items per method and per vintage; the vast majority should be `arima` with d = 1. Expect `d_flag` for
+  13–26 % of items (more than the paper's "very few"); d stays 1, so this is a note, not an error.
 - Plot 3 examples (one seasonal, one quarterly, one monthly non-seasonal) with ACF → `outputs/figures/diag_examples.png`.
 - Test: changing data after the vintage date does not change `item_specs` for that vintage.
 

@@ -25,9 +25,12 @@ description: Orchestrator for the SNB disaggregate-ARIMA replication project. Us
 6. **Verify against §8 Definition of done.** Run the checks; show the key sanity numbers to the user (counts, a plot path,
    a comparison against a paper number).
 7. **Close.** Set status to `done` (or `blocked(<reason>)`), add a one-line note, add new decisions/data rows.
+   List every D-xx the task left `proposed` and ask the user to confirm or change them before closing (otherwise they
+   stay unconfirmed for phases). When a decision is revised, set the old row's status to `revised (→ D-xx rev.)`.
 8. **Micro retro.** Run the `skill-feedback-loop` micro retro for the skill(s) used: log findings in
    `docs/skill_feedback.md`. If this task finished a phase, run the macro retro instead (it includes the review page).
-9. **Refresh the review page.** Run `.venv/Scripts/python scripts/build_review_page.py` (copies the board statuses
+9. **Refresh the review page** (after committing step 10's files when other sessions share the checkout, so the
+   page does not publish their uncommitted rows). Run `.venv/Scripts/python scripts/build_review_page.py` (copies the board statuses
    and the decision log into `docs/review_page/index.html`), then publish that file with the Artifact tool to the
    review-page URL in AGENTS.md §10 (read the artifact first if this session has not published it yet).
    `tests/test_review_page.py` fails while the page is out of sync with the board.
@@ -68,6 +71,10 @@ The project must not depend on anything outside `Arima-model/`. Ask the user bef
 
 ## Rules
 - One task at a time unless the user asks for parallel work.
+- **Parallel sessions in one checkout:** at start, reserve a block of D-xx and F-xxx IDs and list the files you own in
+  the shared notes folder; read siblings' notes first. Number scripts so they do not clash. Commit with
+  `git commit -- <own paths>` (never `git add -A`); in shared files (`config.py`, `decisions.md`, `skill_feedback.md`,
+  AGENTS.md) stage only your own hunks (patch from `git diff`, `git apply --cached`). `git pull --rebase` before push.
 - Run every script with `.venv/Scripts/python` (the package is installed there). If pip tries to build a wheel from
   source, use `--only-binary=:all:` and pin the version it finds (F-022).
 - Edit markdown tables (`decisions.md`, board) with Python or the Edit tool, never `sed` with `|` in the pattern

@@ -12,8 +12,16 @@ def aggregate_index(item_index: pd.DataFrame, weights: pd.DataFrame, items: list
 def quarterly_yoy(index_m: pd.Series) -> pd.Series:
     """Quarterly average of a monthly index → y-o-y % change, indexed by pd.Period('Q')."""
 def build_subaggregate_series(item_index, weights, items: pd.DataFrame, level: Literal["agg1", "agg6", "agg14"]) -> pd.DataFrame:
-    """Historical monthly sub-aggregate indices (inputs for ARIMA(1)/(6)/(14) benchmarks)."""
+    """Historical monthly sub-aggregate indices (inputs for ARIMA(6)/(14) benchmarks)."""
+# forecast side (T2.5)
+def weights_known_at(weights, origin, last_year) -> pd.DataFrame        # origin-year weights carried forward (D-13)
+def splice_forecast(item_index, item_fc, origin) -> pd.DataFrame        # actuals ≤ origin, exp(log_p_hat) after
+def forecast_aggregates(item_index, weights, items, item_fc, origin) -> pd.DataFrame  # long: origin, target, aggregate, index_hat
+def forecast_quarterly_yoy(agg_fc, horizons=range(1, 6)) -> pd.DataFrame  # h → target quarter, π̂
+def subaggregate_weights(weights, items, level) -> pd.DataFrame          # year, group, summed weight
 ```
+Aggregate names: `total`, `excl_oil`, `agg6:<group>`, `agg14:<group>`. Select with `df["aggregate"]`, never
+`df.aggregate` (a pandas method).
 
 ## Formula
 For month `t` in year `y`, with weights `w_{i,y}` normalised over the items included:
@@ -28,9 +36,10 @@ months up to origin, forecast months after.
 
 ## Disaggregation levels for Table 2
 - ARIMA(182): aggregate item forecasts.
-- ARIMA(14)/(6): build historical sub-aggregate indices from the same items, fit **one ARIMA per sub-aggregate** with
-  the item-model machinery (SIC, seasonal check), then aggregate with sub-aggregate weights.
-- ARIMA(1): one ARIMA on total CPI.
+- ARIMA(14)/(6): build historical sub-aggregate indices from the same items, then specify and forecast each group
+  **like an item** (diagnostics + SIC, D-55, `benchmarks.py`); a group counts as collected in a month if any member item
+  is (inferring from the group index alone made Rents 'less than quarterly'). Aggregate with sub-aggregate weights.
+- ARIMA(1): one ARIMA on the **official** CPI (Table 9 weights sum to 100 = full basket, D-47).
 - In all four, errors are measured against **official** CPI inflation (paper p. 11).
 
 ## Checks
@@ -38,3 +47,5 @@ months up to origin, forecast months after.
   gap; save `outputs/figures/chart4_reaggregated_vs_official.png`. Investigate gaps > 0.2 pp (wrong link, missing item, wrong base month).
 - Unit test: if all items have identical index paths, the aggregate equals that path; weights that do not sum to 1 are normalised.
 - Unit test: `quarterly_yoy` on a series growing exactly 2 % p.a. returns 2.0.
+- Sub-aggregates re-aggregated with their summed weights equal the item total (catches chains that never start for
+  groups whose items all enter after May 1993, e.g. Education).

@@ -15,15 +15,19 @@ in every non-collection month. The Kalman filter then automatically conditions o
 exactly eqs. (7)–(8) with `R_t = 0` at collections.
 ```python
 y = log_p.where(collected)            # NaN where SFSO did not collect (|Δ| < 1e-3 → not collected, fn. 9)
-mod = SARIMAX(y, order=(p, 1, 0), seasonal_order=(1, 0, 0, 12) if seasonal else (0, 0, 0, 0),
-              trend="t",              # with d=1, a linear trend in levels = drift μ in Δp (verify!)
+exog = months since sample start      # regression on a time index: Δp = μ + Δu, μ = mean form (D-42)
+mod = SARIMAX(y, exog=exog, order=(p, 1, 0), seasonal_order=(1, 0, 0, 12) if seasonal else (0, 0, 0, 0),
               simple_differencing=False, enforce_stationarity=True)
-res = mod.fit(disp=False)
 ```
-- **Verify the drift parametrisation** by simulation before trusting it (see checks). If it does not behave, implement a
-  small `statsmodels.tsa.statespace.mlemodel.MLEModel` subclass with state `[p_t, Δp_t−μ, …]` and `μ` as a parameter.
-- Order p by SIC as in the item models, but `SSE` is not defined with gaps — use `−2·loglike/T + k·log(T)/T` on the
-  observed points (log as decision; G13).
+- Do **not** use `trend="t"`: that is SARIMAX's intercept form, not the paper's mean μ (verified by simulation, D-42).
+- With the seasonal AR(12), **p ≤ 11** (p = 12 puts lag 12 in both polynomials → ValueError).
+- The optimiser can step onto unit-circle AR roots → `LinAlgError` in the stationary initialisation. Catch it, retry
+  from neutral start values with Nelder-Mead; failed orders get SIC = ∞; at forecast time step p down
+  (`kalman_ext.fit_collection_model`, `fit_with_fallback`, D-42). An unguarded 182-item run crashed after ~10 min.
+- Order p by SIC, but `SSE` is not defined with gaps — use `−2·loglike + k·log(T)` with T = observed changes (D-44, G13).
+- **Compute budget:** SIC over p = 0…12 at every origin × 182 items × 32 origins ≈ 2 days. Time a prototype first and put
+  the order-timing scheme to the user (this project: orders per yearly vintage, parameters re-fitted per origin, D-44;
+  order search ~1–2 h on 6 processes, `KALMAN_VINTAGES` — extend it for later origins).
 - Sample from **1993** (paper p. 14) where data exist; earlier bases must be chain-linked (panel skill).
 
 ## Forecasting (eq. 13)
@@ -34,12 +38,13 @@ res = mod.fit(disp=False)
 - Interpolation: `res.smoothed_state` → interpolated monthly series (reproduce paper Chart 3 for trousers).
 
 ## Integration
-- New `method = "kalman"` in `item_specs.csv` (all items except oil and rent in the paper's Table 4 run — note paper says
-  special models were **not** used in the extension, p. 15).
+- Used for **all 182 items, incl. oil and rents** (paper p. 15 / Table 4: special models not used in the extension, D-41).
+- Items on an ad-hoc rule in the ARIMA(182) (sticky 'last value' items) are a choice to flag: with a 1993 drift they lose
+  in Health; a hybrid keeping their ad-hoc rule helps at h = 4–5 (D-53 sensitivity).
 - Plug into `forecast_item` dispatch; evaluate with `snb-arima-evaluation` → Table 4 (target: 0.06, 0.32, 0.64, 0.86, 1.00).
 
 ## Checks
-- **Simulation test**: simulate monthly AR(2) changes with drift (T = 300), observe the level quarterly for the first half
+- **Simulation test**: simulate monthly AR(2) changes with drift (T ≥ 1000; T = 300 is too noisy for a 0.15 tolerance on φ), observe the level quarterly for the first half
   and monthly afterwards; estimated `φ, μ, σ²` within sampling error of the truth; smoothed changes correlate highly with truth.
 - With monthly collection throughout, the extended model's estimates ≈ a plain ARIMA(p,1,0) fit.
 - No-look-ahead test as in other model skills; collection-month assumption uses only data from before the origin.
